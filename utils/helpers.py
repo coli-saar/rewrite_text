@@ -1,6 +1,10 @@
 from contextlib import contextmanager, AbstractContextManager
 from pathlib import Path
 from itertools import zip_longest
+import spacy
+import yaml
+import matplotlib.pyplot as plt
+from utils.paths import get_data_preprocessed_dir
 
 
 def print_something():
@@ -34,15 +38,79 @@ def yield_lines_in_parallel(filepaths, strip=True, strict=True, n_lines=float('i
             yield parallel_lines
 
 
-f1, f2 = "a.complex", "a.simple"
+# f1, f2 = "a.complex", "a.simple"
+#
+# for x in yield_lines_in_parallel([f1, f2], strict=True):
+#     # print(len(x))
+#     # for y in x:
+#     #     print(y)
+#     a, b = x
+#     print("complex:", a)
+#     print("simple:",b)
 
-for x in yield_lines_in_parallel([f1, f2], strict=True):
-    print(len(x))
-    for y in x:
-        print(y)
+# for a, b in yield_lines_in_parallel([f1, f2], strict=True):
+#     print(a)
+#     print(b)
 
 # TODO write code for writing into files (preprocessed and equipped with features)
 
 
+def load_yaml(file_path):
+    with open(file_path, "r") as file:
+        return yaml.safe_load(file)
+
+
+def format_control_features(feature_value, feature_token, source_string):
+    pass
+
+
+def prepend_feature_to_string(original_source_string, original_target_string,
+                              feature_list, feature_value_dict, lang, path_to_tokenizer):
+    # tokenize the original source and target sentence - for now with the spacy tokenizer
+    # TODO: train a sentencepiece tokenizer - before running preprocess.py
+    # include the special tokens as well (as user-defined symbols)
+    # https://github.com/google/sentencepiece/blob/master/doc/special_symbols.md
+    # Multiple files can be used to train it https://github.com/google/sentencepiece/issues/489
+    # Use the train and val SRC and TGT
+
+    # mapping: feature: special_token
+    feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
+
+    # define the spacy model
+    lang_model = {"en": "en_core_web_sm", "de": "de_core_news_sm"}
+    if lang.lower() not in lang_model:
+        print("Language choice not supported, defaulting to English (other option: German)")
+        lang = "en"
+
+    nlp_model = spacy.load(lang_model[lang])
+    source_tokens = [t.text for t in nlp_model(original_source_string) if t.text not in {" ", "  "}]
+    to_be_prepended = ""
+    for f in feature_list:
+        v = str(round(feature_value_dict[f], 2))
+        #print(f, v)
+        prep = "<" + feature2spec_token[f] + "_" + v + ">"
+        to_be_prepended += prep
+
+    new_source = to_be_prepended + " " + " ".join(source_tokens)
+    new_target = " ".join([z.text for z in nlp_model(original_target_string)])
+
+    #print("New source: ", new_source, "\n", "New target: ", new_target, "-"*10)
+    return new_source, new_target
+
+
+def plot_histogram(x, feature_name, lang):
+    n_bins = 80  # 50 in the binned version for NLG
+    if feature_name in {"levenshtein"}:
+        n_bins = 50  # 30 in the binned version for NLG
+    plt.hist(x, density=False, bins=n_bins)  # density=False would make counts
+    plt.ylabel('Count')
+    plt.xlabel(feature_name)
+    plt.title("Histogram for " + feature_name + " in " + lang)
+    out_name = str(get_data_preprocessed_dir(lang) / feature_name) + ".png"
+    plt.savefig(out_name)
+    plt.clf()
+
+
 def write_output_into_file(filename):
     pass
+
