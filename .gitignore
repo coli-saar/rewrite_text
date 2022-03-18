@@ -1,0 +1,7 @@
+# models
+*.pt
+
+# word embeddings
+*.vec
+frequency_ranks_*json
+
