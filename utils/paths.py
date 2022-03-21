@@ -1,4 +1,5 @@
 import git
+import os
 from pathlib import Path
 from itertools import combinations, product
 
@@ -83,6 +84,15 @@ def get_phase_suffix_pairs():
             phase_list.append((phase, suffix))
         file_pairs.append(sorted(phase_list))
     return file_pairs  # [ [("train", "src), ("train", "tgt")], ... ]
+
+
+def check_if_dir_exists_and_is_empty(dir_path):
+    # if the path to dir exists, delete its contents
+    if os.path.exists(dir_path):
+        [f.unlink() for f in Path(dir_path).glob("*") if f.is_file()]
+    # if the dir doesn't exist create it
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
 #di = get_out_filepaths_dict("de", ["dependency", "frequency", "length"])
 # ('train', 'src'): PosixPath('/home/skrjanec/rewrite_text/data_preprocessed/de/dependency_frequency_length/train.src')

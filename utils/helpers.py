@@ -1,4 +1,8 @@
 from contextlib import contextmanager, AbstractContextManager
+import sys
+import os
+from collections import defaultdict
+import re
 from pathlib import Path
 from itertools import zip_longest
 import spacy
@@ -88,10 +92,10 @@ def prepend_feature_to_string(original_source_string, original_target_string,
     for f in feature_list:
         v = str(round(feature_value_dict[f], 2))
         #print(f, v)
-        prep = "<" + feature2spec_token[f] + "_" + v + ">"
+        prep = "<" + feature2spec_token[f] + "_" + v + "> "
         to_be_prepended += prep
 
-    new_source = to_be_prepended + " " + " ".join(source_tokens)
+    new_source = to_be_prepended + " ".join(source_tokens)
     new_target = " ".join([z.text for z in nlp_model(original_target_string)])
 
     #print("New source: ", new_source, "\n", "New target: ", new_target, "-"*10)
@@ -113,4 +117,61 @@ def plot_histogram(x, feature_name, lang):
 
 def write_output_into_file(filename):
     pass
+
+
+def match_dir_with_features(list_allowed_features, list_requested_features):
+    assert set(list_requested_features).issubset(set(list_allowed_features))
+    d = "_".join(sorted(list_requested_features))  # sort alphabetically and join into a string
+    return d
+
+
+@contextmanager
+def log_stdout(filepath, mute_stdout=False):
+    """ Context manager to write both to stdout and to a file """
+    class MultipleStreamsWriter:
+        def __init__(self, streams):
+            self.streams = streams
+
+        def write(self, message):
+            for stream in self.streams:
+                stream.write(message)
+
+        def flush(self):
+            for stream in self.streams:
+                stream.flush()
+
+    save_stdout = sys.stdout
+    log_file = open(filepath, 'w')
+    if mute_stdout:
+        sys.stdout = MultipleStreamsWriter([log_file])  # Write to file only
+    else:
+        sys.stdout = MultipleStreamsWriter([save_stdout, log_file])  # Write to both stdout and file
+    try:
+        yield
+    finally:
+        sys.stdout = save_stdout
+        log_file.close()
+
+
+def yield_lines(filepath, n_lines=float('inf'), prop=1):
+    # if prop < 1:
+    #     assert n_lines == float('inf')
+    #     n_lines = int(prop * count_lines(filepath))
+    with open(filepath, 'r') as f:
+        for i, l in enumerate(f):
+            if i >= n_lines:
+                break
+            yield l.rstrip('\n')
+
+
+def parse_model_hypotheses(filepath):
+    hypotheses_dict = defaultdict(list)
+    for line in yield_lines(filepath):
+        match = re.match(r'^H-(\d+)\t-?\d+\.\d+\t(.*)$', line)
+        if match:
+            sample_id, hypothesis = match.groups()
+            hypotheses_dict[int(sample_id)].append(hypothesis)
+    # Sort in original order
+    return [hypotheses_dict[i] for i in range(len(hypotheses_dict))]
+
 
