@@ -49,6 +49,14 @@ def maximum_dependency_length(s, t, lang, absolute):
     #print(all_depths)
     max_depth_source = max([walk_tree(sent.root, 0) for sent in doc.sents])
 
+    if max_depth_source == 0:  # single word sentences...
+        #print("source depth 0??")
+        #import pdb; pdb.set_trace()
+        max_depth_source = 0.5
+    if max_depth_target == 0:
+        #print("target depth 0??")
+        #import pdb; pdb.set_trace()
+        max_depth_target = 0.5
     depth_ratio = max_depth_target / max_depth_source
 
     return depth_ratio

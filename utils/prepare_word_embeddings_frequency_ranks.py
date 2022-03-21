@@ -29,8 +29,8 @@ def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
 
 
 def write_ranks_into_file():
-    ranks = read_in_embeddings_return_frequency_rank_dict("/home/skrjanec/rewrite_text/data_auxiliary/en/cc.en.300.vec")
-    with open("/home/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json", "w") as fout:
+    ranks = read_in_embeddings_return_frequency_rank_dict("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/cc.en.300.vec")
+    with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json", "w") as fout:
         json.dump(ranks, fout)
 
 
@@ -38,10 +38,10 @@ def load_ranks(lang):
     if lang.lower() not in {"en", "de"}:
         print("Language choice not supporting, defaulting to English")
     if lang == "de":
-        with open("/home/skrjanec/rewrite_text/data_auxiliary/de/frequency_ranks.json") as fin:
+        with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/de/frequency_ranks.json") as fin:
             ranks = json.load(fin)
         return ranks
-    with open("/home/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json") as fin:
+    with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json") as fin:
         ranks = json.load(fin)
     return ranks
 

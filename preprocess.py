@@ -32,7 +32,7 @@ LANG = config["lang"].lower()
 
 lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
-splits_allowed = {"train", "val", "test"}
+splits_allowed = {"train", "valid", "test"}
 
 # some checks
 assert LANG in lang_allowed
