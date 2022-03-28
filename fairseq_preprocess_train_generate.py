@@ -9,10 +9,15 @@ import yaml
 from pathlib import Path
 import argparse
 import os
+import subprocess
 from utils.helpers import match_dir_with_features, load_yaml
 from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq
-from utils.paths import get_data_preprocessed_dir, get_experiment_dir, check_if_dir_exists_and_is_empty
-from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq
+from utils.paths import get_data_preprocessed_dir, get_experiment_dir, check_if_dir_exists_and_is_empty, get_evaluation_dir
+from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq, evaluation_automatic_metrics
+import torch
+
+#import torch.distributed as dist
+#dist.init_process_group('gloo', init_method='file:///tmp/somefile', rank=0, world_size=1) 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="yaml config file preprocess/train/generate")
@@ -20,15 +25,15 @@ args = vars(parser.parse_args())
 
 config = load_yaml(args["config"])
 FEATURES_REQUESTED = sorted(config["features_requested"])
-LANG = config["lang"].lower()
-EXP_ID = config["experiment_id"].lower()
+LANG = config["language"].lower()
+EXP_ID = str(config["experiment_id"]).lower()
 PREPROCESS, TRAIN, GENERATE = config["preprocess"], config["train"], config["generate"]
 # LANG = "en"
 # FEATURES_REQUESTED = ["dependency", "frequency", "length"]
 
 lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
-splits_allowed = {"train", "val", "test"}
+splits_allowed = {"train", "valid", "test"}
 
 # some checks
 assert LANG in lang_allowed
@@ -46,6 +51,7 @@ destination_dir_fairseq_preprocessing = dir_input_to_preprocessing / "fairseq"
 
 # if preprocess
 if PREPROCESS:
+    print("... PREPROCESSING")
     # the destination directory should be empty otherwise the code will raise an error and finish
     # here check if the destination exists (else create), and if it's empty
     check_if_dir_exists_and_is_empty(destination_dir_fairseq_preprocessing)
@@ -57,6 +63,7 @@ if PREPROCESS:
 
 # if train
 if TRAIN:
+    print("... TRAINING")
     experiment_dir_full = get_experiment_dir(EXP_ID)
     checkpoint_suffix = "checkpoints"
     if not os.path.exists(experiment_dir_full):
@@ -68,7 +75,14 @@ if TRAIN:
 
 # if generate
 if GENERATE:
+    print("... INFERENCE")
     checkpoint_suffix = "checkpoints"
     experiment_checkpoint_dir_full = get_experiment_dir(EXP_ID) / checkpoint_suffix
     generate_with_fairseq(dir_with_test_data_and_vocab=destination_dir_fairseq_preprocessing,
                           dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
+
+    torch.cuda.empty_cache()  # will this help with the OOM?
+    # evaluate with EASSE for BLEU, SARI and BERTScore, tokenize with Moses. Write the results into a file in the same directory as  checkpoint_bast.pt and generation2.out
+    print("... AUTOMATIC EVALUATION")
+    evaluation_automatic_metrics(dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
+

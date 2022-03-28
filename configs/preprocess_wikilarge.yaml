@@ -1,7 +1,5 @@
-experiment_id: 99
+experiment_id: 033
 lang: en
 features: ["dependency", "frequency", "length", "levenshtein"]
 analyze_features: True
 overwrite: True
-# path_to_data: "data/de"
-

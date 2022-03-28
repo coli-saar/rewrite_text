@@ -2,13 +2,14 @@ import shutil
 import os
 from pathlib import Path
 import contextlib
+import subprocess
 from fairseq import options
 from fairseq_cli import preprocess, train, generate
-from utils.paths import get_data_preprocessed_dir
+from utils.paths import get_data_preprocessed_dir, get_evaluation_dir
 from utils.helpers import log_stdout, yield_lines, parse_model_hypotheses
 
 import torch.distributed as dist
-dist.init_process_group('gloo', init_method='file:///tmp/somefile', rank=0, world_size=1)   # TODO
+#dist.init_process_group('gloo', init_method='file:///tmp/somefile', rank=0, world_size=1)   # TODO
 
 #print(get_data_preprocessed_dir("en"))
 
@@ -63,6 +64,7 @@ def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
     # NOTE: the first arg is "data" (no flag?) and it's a dir that has to contain the preprocessed files (dict)
     # as well as ?
     # every
+    dist.init_process_group('gloo', init_method='file:///tmp/somefile', rank=0, world_size=1)
     save_dir_full_path = experiment_dir / dir_checkpoints_suffix
     # /home/skrjanec/rewrite_text/experiments/03/checkpoints
     if not os.path.exists(save_dir_full_path):
@@ -96,16 +98,21 @@ def generate_with_fairseq(dir_with_model_test_data_and_vocab,
                           target_test_fname="test.src-tgt.tgt"):
     # the first argument is a directory that contains the model, the vocabulary dict* and test files
     # copy the dict* and test* files from respective directories
+    #print("dir with model, move the test data and vocabs here", dir_with_model_test_data_and_vocab)
+    #print("dir with all data and vocabs, move from here", dir_with_test_data_and_vocab)
     if isinstance(dir_with_model_test_data_and_vocab, str):
         dir_with_model_test_data_and_vocab = Path(dir_with_model_test_data_and_vocab)
     if isinstance(dir_with_test_data_and_vocab, str):
         dir_with_test_data_and_vocab = Path(dir_with_test_data_and_vocab)
-
+    #print("dir with model, move the test data and vocabs here", dir_with_model_test_data_and_vocab)
+    #print("dir with all data and vocabs, move from here", dir_with_test_data_and_vocab)
     # copy vocab into the dir_with_model_test_data_and_vocab
     source_vocab_full = dir_with_test_data_and_vocab / source_vocab_fname  # origin
     target_vocab_full = dir_with_test_data_and_vocab / target_vocab_fname  # origin
     dest_src_vocab = dir_with_model_test_data_and_vocab / source_vocab_fname  # destination
-    dest_tgt_vocab = dir_with_model_test_data_and_vocab / target_vocab_full  # destination
+    dest_tgt_vocab = dir_with_model_test_data_and_vocab / target_vocab_fname  # destination
+    #print("origin and destination, SOURCE VOCAB", source_vocab_full, dest_src_vocab)
+    #print("origin and destination, *TARGET* VOCAB", target_vocab_full, dest_tgt_vocab)
     shutil.copy(source_vocab_full, dest_src_vocab)
     shutil.copy(target_vocab_full, dest_tgt_vocab)
 
@@ -135,7 +142,7 @@ def generate_with_fairseq(dir_with_model_test_data_and_vocab,
     print("*** Starting generation - inference")
     with log_stdout(out_file, mute_stdout=True):
         generate.main(gen_args)  # TODO: write this st out into a specific file
-        pass
+        
 
     # parse this file to fetch out the hypotheses H-N, order them 0, 1, 2... and evaluate with sacrebleu
     ordered_hypotheses = parse_model_hypotheses(out_file)
@@ -143,7 +150,23 @@ def generate_with_fairseq(dir_with_model_test_data_and_vocab,
     out_file2 = str(dir_with_model_test_data_and_vocab / "generation2.out")
     with open(out_file2, "w") as fout:
         for line in ordered_hypotheses:
-            fout.write(line + "\n")
+            fout.write(line[0] + "\n")
 
+
+def evaluation_automatic_metrics(dir_with_model_test_data_and_vocab,
+                                 source_test_fname="test.src-tgt.src",
+                                 target_test_fname="test.src-tgt.tgt"):
+
+    # evaluation metrics with EASSE
+    # this is not fairseq, but it's easier to add evaluation here
+    eval_script = get_evaluation_dir() / "easse_evaluate.sh"
+    result_file = open(dir_with_model_test_data_and_vocab / "evaluation.txt", "w")
+    dest_src_test = dir_with_model_test_data_and_vocab / source_test_fname
+    dest_tgt_test = dir_with_model_test_data_and_vocab / target_test_fname
+    out_file2 = str(dir_with_model_test_data_and_vocab / "generation2.out")
+ 
+    commands = ["sh", str(eval_script), str(dest_src_test), str(dest_tgt_test), out_file2]
+    result = subprocess.call(commands, stdout=result_file)
+    result_file.close()
 
 

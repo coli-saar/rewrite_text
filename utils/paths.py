@@ -17,7 +17,9 @@ data_auxiliary_dir = Path(REPO_DIR) / "data_auxiliary"
 configs_dir = Path(REPO_DIR) / "configs"
 experiments_dir = Path(REPO_DIR) / "experiments"
 
-splits = ["train", "val", "test"]
+evaluation_dir = Path(REPO_DIR) / "evaluation"
+
+splits = ["train", "valid", "test"]
 suffixes = ["src", "tgt"]
 features = ["dependency", "frequency", "length", "leven"]
 
@@ -50,6 +52,10 @@ def get_configs_dir(exp_id):
 
 def get_data_auxiliary_dir(lang):
     return data_auxiliary_dir / lang
+
+
+def get_evaluation_dir():
+    return evaluation_dir
 
 
 def get_data_filepath(_features, phase, suffix, lang):

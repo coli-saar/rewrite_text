@@ -5,3 +5,5 @@
 *.vec
 frequency_ranks_*json
 
+# nohup out
+nohup.out
