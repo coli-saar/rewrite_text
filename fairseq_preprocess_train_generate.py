@@ -30,6 +30,9 @@ EXP_ID = str(config["experiment_id"]).lower()
 PREPROCESS, TRAIN, GENERATE = config["preprocess"], config["train"], config["generate"]
 # LANG = "en"
 # FEATURES_REQUESTED = ["dependency", "frequency", "length"]
+# HYPERPARAMETERS
+hyper = {"lr": float(config["lr"]), "batch_size": int(config["batch_size"]),
+         "test_batch_size": int(config["test_batch_size"]), "beam_size": int(config["beam_size"])}
 
 lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
@@ -70,7 +73,8 @@ if TRAIN:
         os.makedirs(experiment_dir_full)  # /home/skrjanec/rewrite_text/experiments/03
 
     train_with_fairseq(dir_with_preprocessed_files=destination_dir_fairseq_preprocessing,
-                       experiment_dir=experiment_dir_full, dir_checkpoints_suffix=checkpoint_suffix)
+                       experiment_dir=experiment_dir_full, dir_checkpoints_suffix=checkpoint_suffix,
+                       lr=hyper["lr"], batch_size=hyper["batch_size"])
 
 
 # if generate

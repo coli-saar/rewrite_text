@@ -48,6 +48,7 @@ def preprocess_with_fairseq(data_directory,
 
 def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
                        batch_size=16,
+                       lr=0.002,
                        arch="transformer",
                        max_epoch=10,
                        optimizer="adam",
@@ -72,7 +73,7 @@ def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
     mini_args = [dir_with_preprocessed_files, "--arch", arch, "--max-epoch", max_epoch, "--source-lang",
                  source_lang, "--target-lang", target_lang, "--save-dir", save_dir_full_path,
                  "--batch-size", batch_size, "--dataset-impl", dataset_implementation, "--task", "translation",
-                 "--optimizer", optimizer, "--no-epoch-checkpoints"]
+                 "--optimizer", optimizer, "--lr", lr, "--no-epoch-checkpoints"]
 
     # mini_args = ["/home/AK/skrjanec/toydata/data_bin/", "--arch", "transformer", "--max-epoch", "5", "--source-lang",
     #              source_lang, "--target-lang", target_lang, "--save-dir", "/home/AK/skrjanec/toydata/experiments/01/checkpoints/",
