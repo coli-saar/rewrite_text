@@ -47,7 +47,7 @@ def preprocess_with_fairseq(data_directory,
 
 
 def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
-                       batch_size=32,
+                       batch_size=16,
                        arch="transformer",
                        max_epoch=10,
                        optimizer="adam",

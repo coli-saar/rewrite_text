@@ -46,4 +46,4 @@ def load_ranks(lang):
     return ranks
 
 
-write_ranks_into_file()
+#write_ranks_into_file()
