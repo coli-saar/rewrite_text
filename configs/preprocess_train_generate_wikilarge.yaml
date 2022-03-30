@@ -1,7 +1,7 @@
-preprocess: True
+preprocess: False
 train: True
 generate: True
-experiment_id: 04
+experiment_id: 05
 #destination_dir: "data_preprocessed/fairseq_preprocessed"
 #data_directory: ""
 features_requested: ["dependency", "frequency", "length", "levenshtein"]
@@ -10,6 +10,6 @@ arch: "transformer"
 optimizer: "adam"
 batch_size: 16
 test_batch_size: 16
-max_epochs: 50
+max_epochs: 40
 beam_size: 8
 lr: 0.00011

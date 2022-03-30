@@ -1,5 +1,5 @@
 preprocess: False
-train: False
+train: True
 generate: True
 experiment_id: 02
 #destination_dir: "data_preprocessed/fairseq_preprocessed"
