@@ -1,0 +1,1 @@
+{'bleu': 1.945, 'sari': 31.16, 'bertscore_precision': 0.006, 'bertscore_recall': 0.01, 'bertscore_f1': 0.008}
