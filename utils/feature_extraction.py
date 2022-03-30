@@ -183,7 +183,7 @@ def word_frequency_rank(source, target, lang, _ranks, absolute):
 def feature_bundle_sentence(source, target, lang, list_of_desired_features, _freq_ranks):
     bundle = {}
     if "frequency" in list_of_desired_features:
-        v = word_frequency_rank(source, target, lang, _freq_ranks, absolute=False)  # TODO: fix ranks: should be an arg
+        v = word_frequency_rank(source, target, lang, _freq_ranks, absolute=False)
         bundle["frequency"] = v
     if "dependency" in list_of_desired_features:
         v = maximum_dependency_length(source, target, lang, absolute=False)

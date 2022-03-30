@@ -5,5 +5,5 @@
 #HYPOTHESES = $3
 
 # evalate with EASSE
-easse evaluate -m bleu,sari,bertscore -t custom -tok moses --refs_sents_paths $2 --orig_sents_path $1 --sys_sents_path $3
+easse evaluate -m bleu,sari,fkgl,bertscore -t custom -tok moses --refs_sents_paths $2 --orig_sents_path $1 --sys_sents_path $3
 

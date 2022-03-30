@@ -171,4 +171,7 @@ def evaluation_automatic_metrics(dir_with_model_test_data_and_vocab,
     result = subprocess.call(commands, stdout=result_file)
     result_file.close()
 
+    # return the names of the SOURCE and the GENERATION file
+    return str(dest_src_test), out_file2
+
 

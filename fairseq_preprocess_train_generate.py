@@ -14,6 +14,7 @@ from utils.helpers import match_dir_with_features, load_yaml
 from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq
 from utils.paths import get_data_preprocessed_dir, get_experiment_dir, check_if_dir_exists_and_is_empty, get_evaluation_dir
 from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq, evaluation_automatic_metrics
+from evaluation.feature_match_evaluate import parse_file_pair_return_analysis
 import torch
 
 #import torch.distributed as dist
@@ -86,7 +87,15 @@ if GENERATE:
                           dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
 
     torch.cuda.empty_cache()  # will this help with the OOM?
-    # evaluate with EASSE for BLEU, SARI and BERTScore, tokenize with Moses. Write the results into a file in the same directory as  checkpoint_bast.pt and generation2.out
+    # evaluate with EASSE for BLEU, SARI and BERTScore, tokenize with Moses.
+    # Write the results into a file in the same directory as  checkpoint_bast.pt and generation2.out
     print("... AUTOMATIC EVALUATION")
-    evaluation_automatic_metrics(dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
+    test_src_path, test_system_path = \
+        evaluation_automatic_metrics(dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
 
+    # evaluate also for the match in feature values between requested and actually generated features
+    # use the paths test_src_path and test_system_path
+
+    # use another function to handle: calling feature extraction, bin preparation
+    # match evaluation
+    parse_file_pair_return_analysis(test_src_path, test_system_path, FEATURES_REQUESTED, LANG)

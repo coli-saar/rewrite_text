@@ -10,6 +10,7 @@ import yaml
 import matplotlib.pyplot as plt
 from utils.paths import get_data_preprocessed_dir
 
+feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 
 def print_something():
     print("something")
