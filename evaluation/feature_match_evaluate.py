@@ -78,6 +78,9 @@ def parse_file_pair_return_analysis(orig_src_path, system_out_path, requested_fe
         f_vals_bin_gen, f_vals_exact = feature_bins_bundle_sentence(src_sent, tgt_sent, lang, requested_features,
                                                                     feature_bins, frequency_ranks)
 
+        # change the feature names to abbreviated versions and round the GEN bins to 2 decimals
+        f_vals_bin_gen = {feature2spec_token[f]: round(v, 2) for f, v in f_vals_bin_gen.items()}
+
         # compare the intended and actual features
         if f_vals_bin_orig:
             sent_feat_match = analyze_f_match(f_vals_bin_orig, f_vals_bin_gen)
