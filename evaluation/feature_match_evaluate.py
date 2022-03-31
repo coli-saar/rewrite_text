@@ -68,6 +68,7 @@ def parse_file_pair_return_analysis(orig_src_path, system_out_path, requested_fe
 
     feature_matching = {feature2spec_token[f]: {"match": 0, "mismatch": []} for f in requested_features}
     sentence_pair_counter = 0
+    print("... Evaluating feature bin match")
     # open the files and iterate over lines/sentences
     for src_sent, tgt_sent in yield_lines_in_parallel([orig_src_path, system_out_path], strict=True):
         sentence_pair_counter += 1
@@ -86,17 +87,18 @@ def parse_file_pair_return_analysis(orig_src_path, system_out_path, requested_fe
             sent_feat_match = analyze_f_match(f_vals_bin_orig, f_vals_bin_gen)
             for _f in sent_feat_match["match"]:
                 feature_matching[_f]["match"] += 1
-            for _misf, _v in sent_feat_match["mismatch"]:
+            for _misf, _v in sent_feat_match["mismatch"].items():
                 feature_matching[_misf]["mismatch"].append(_v)
 
     # print some initial results
-    total_matches = sum(f["match"] for f in feature_matching)
+    total_matches = sum(d["match"] for f, d in feature_matching.items())
     print("Considered features: ", len(requested_features))
-    print("Number of sentence pairs %d, number of exact feature bin matches %d" % (sentence_pair_counter, total_matches))
+    print("Number of sentence pairs %d, so total number of features is %d" % (sentence_pair_counter, len(requested_features) * sentence_pair_counter))
+    print("Nnumber of exact feature bin matches %d" % total_matches)
     # TODO plot mismatches ?
     # average divergence from the original feature bin
-    for f in feature_matching:
-        avg_delta = np.mean(f["mismatch"])
+    for f, d in feature_matching.items():
+        avg_delta = np.mean(d["mismatch"])
         print("Average divergence from the original bin value for feature %s %f" % (f, avg_delta))
 
     # TODO save the deltas?
