@@ -1,10 +1,9 @@
 """
 List of features supported:
-1) maximum dependency length  SYNTACTIC COMPLEXITY OF THE TARGET
+1) maximum dependency length  ratio
 2) target/source ratio in terms of character count  LENGTH RATIO
 3) Levenshtein edit ratio: between 0 and 1  SURFACE FORM SIMILARITY
-4) word frequency in the target: third quantile of the word frequencies in the target sentence
-
+4) word frequency in the target: third quantile of the word frequencies ratio
 
 """
 

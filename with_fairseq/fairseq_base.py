@@ -143,7 +143,7 @@ def generate_with_fairseq(dir_with_model_test_data_and_vocab,
     out_file = str(dir_with_model_test_data_and_vocab / "generation.out")
     print("*** Starting generation - inference")
     with log_stdout(out_file, mute_stdout=True):
-        generate.main(gen_args)  # TODO: write this st out into a specific file
+        generate.main(gen_args)
         
 
     # parse this file to fetch out the hypotheses H-N, order them 0, 1, 2... and evaluate with sacrebleu

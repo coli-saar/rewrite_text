@@ -55,7 +55,7 @@ destination_dir_fairseq_preprocessing = dir_input_to_preprocessing / "fairseq"
 
 # if preprocess
 if PREPROCESS:
-    print("... PREPROCESSING")
+    print("... STEP: PREPROCESSING")
     # the destination directory should be empty otherwise the code will raise an error and finish
     # here check if the destination exists (else create), and if it's empty
     check_if_dir_exists_and_is_empty(destination_dir_fairseq_preprocessing)
@@ -67,7 +67,7 @@ if PREPROCESS:
 
 # if train
 if TRAIN:
-    print("... TRAINING")
+    print("... STEP: TRAINING")
     experiment_dir_full = get_experiment_dir(EXP_ID)
     checkpoint_suffix = "checkpoints"
     if not os.path.exists(experiment_dir_full):
@@ -80,15 +80,15 @@ if TRAIN:
 
 # if generate
 if GENERATE:
-    print("... INFERENCE")
+    print("... STEP: INFERENCE")
     checkpoint_suffix = "checkpoints"
     experiment_checkpoint_dir_full = get_experiment_dir(EXP_ID) / checkpoint_suffix
     generate_with_fairseq(dir_with_test_data_and_vocab=destination_dir_fairseq_preprocessing,
                           dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
 
     torch.cuda.empty_cache()  # will this help with the OOM?
-    # evaluate with EASSE for BLEU, SARI and BERTScore, tokenize with Moses.
-    # Write the results into a file in the same directory as  checkpoint_bast.pt and generation2.out
+    # evaluate with EASSE for BLEU, SARI, FKGL and BERTScore, tokenize with Moses.
+    # Write the results into a file in the same directory as  checkpoint_best.pt and generation2.out
     print("... AUTOMATIC EVALUATION")
     test_src_path, test_system_path = \
         evaluation_automatic_metrics(dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
