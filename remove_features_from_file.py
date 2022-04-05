@@ -26,7 +26,7 @@ features_allowed = ["dependency", "frequency", "length", "levenshtein"]
 feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 suffix_allowed = ".src"
 
-repo = git.Repo('.', search_parent_directories=True)
+repo = git.Repo('utils', search_parent_directories=True)
 REPO_DIR = repo.working_tree_dir
 path_to_4features_dir = Path(REPO_DIR) / "data_preprocessed" / LANG / "dependency_frequency_length_levenshtein"
 
