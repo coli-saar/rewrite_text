@@ -20,7 +20,7 @@ from fairseq import options
 from fairseq_cli import generate
 from generation.helpers_generation import update_requested_features_with_bins, copy_vocab_files, preprocess_src_file, \
     prepare_special_token_string
-from utils.paths import get_experiment_dir
+from utils.paths import get_experiment_dir, get_repo_dir
 from utils.helpers import parse_model_hypotheses, log_stdout
 
 parser = argparse.ArgumentParser()
@@ -63,9 +63,14 @@ model_path = model_dir / "checkpoint_best.pt"
 if not os.path.exists(model_dir):
     sys.exit("Error: This model directory does not exist" + str(model_dir))
 
-data_dir = Path(args["data_dir"])
+data_dir = Path(get_repo_dir()) / args["data_dir"]
+#data_dir = Path(args["data_dir"])
 src_file_path = data_dir / "test.txt"
-suffix = args["experiment_id"] + "_test.src"
+#suffix = args["experiment_id"] + "_test.src"
+#suffix = "test.src"
+suffix = "test.src-tgt.src"
+source_lang = "src"
+target_lang = "tgt"
 src_file_destin = data_dir / suffix
 if not os.path.exists(data_dir):
     sys.exit("Error: This data directory does not exist" + str(data_dir))
@@ -81,12 +86,14 @@ copy_vocab_files(origin_dir=model_dir, destination_dir=data_dir)
 special_token_str = prepare_special_token_string(features_values, feature2spec_token)
 preprocess_src_file(src_file_path, src_file_destin, special_token_str)
 
+
 # GENERATING: INFERENCE #
 print("+++ INFERENCE +++")
 def generate_main():
     # fairseq.generate --> write the output into a temp file
     inference_args = [data_dir, "--path", model_path, "--batch-size", 12, "--beam", args["beam"],
-                      "--dataset-impl", "raw"]
+                      "--dataset-impl", "raw", "--source-lang", source_lang, "--target-lang", target_lang]
+    print("ARGUMENTS FOR DECODING", inference_args)
     inference_args = [str(a) for a in inference_args]
     inference_parser = options.get_generation_parser()
     inf_args = options.parse_args_and_arch(inference_parser, inference_args)

@@ -66,7 +66,7 @@ def select_relevant_features_return_str(f_combination, feat_dict):
     f_relevant_d = {feature2spec_token[f_name]: feat_dict[feature2spec_token[f_name]] for f_name in f_combination}
     s = ""
     for k, v in f_relevant_d.items():
-        s += "<" + k + "_" + v + "> "
+        s += "<" + k + "_" + str(v) + "> "
     return s
 
 
