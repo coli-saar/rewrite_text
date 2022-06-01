@@ -34,6 +34,10 @@ def create_feature_combinations():
     return combos
 
 
+def get_repo_dir():
+    return REPO_DIR
+
+
 def get_data_original_dir(lang):
     return data_original_dir / lang
 
