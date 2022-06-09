@@ -19,6 +19,8 @@ Afterwards, download the language models separately using
 - `python -m spacy download en_core_web_sm` for English
 - `python -m spacy download de_core_news_sm` for German
 
+Other dependencies: `easse` (install following the [instructions]([url](https://github.com/feralvam/easse))), `tensorboardX`(with pip), `nltk` stopwords (`python -m nltk.downloader stopwords`).
+
 
 Download the Fasttext embeddings from this [site](https://fasttext.cc/docs/en/crawl-vectors.html) and put the unzipped file into the directory:
 - `data_auxiliary/en` for English
