@@ -52,8 +52,8 @@ frequency_ranks = load_ranks(LANG)
 def phase_open_process_write(src_tuple, tgt_tuple, in_src_PATH, in_tgt_PATH):
     """ ("phase", "src"), ("phase", "tgt") """
     # open the out files
-    new_source = open(output_file_paths[src_tuple], "w")
-    new_target = open(output_file_paths[tgt_tuple], "w")
+    new_source = open(output_file_paths[src_tuple], "w", encoding="utf-8")
+    new_target = open(output_file_paths[tgt_tuple], "w", encoding="utf-8")
 
     feature_dict_vals = {feat: [] for feat in FEATURES_REQUESTED}
 
@@ -93,4 +93,3 @@ for phase in parallel_pairs_list:
 if config["analyze_features"]:
     for f, _x in all_phases_all_feature_values.items():
         plot_histogram(_x, f, LANG)
-
