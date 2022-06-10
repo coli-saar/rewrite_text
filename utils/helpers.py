@@ -9,6 +9,9 @@ import spacy
 import yaml
 import matplotlib.pyplot as plt
 from utils.paths import get_data_preprocessed_dir
+# TODO: need to add sentencepiece to the requirements then
+import sentencepiece as spm
+from .paths import data_auxiliary_dir, REPO_DIR
 
 feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 
@@ -22,7 +25,7 @@ def open_files(filepaths, mode='r'):
     # this function is useful also for readily preprocessed files that have text features
     files = []
     try:
-        files = [Path(filepath).open(mode) for filepath in filepaths]
+        files = [Path(filepath).open(mode, encoding="utf-8") for filepath in filepaths]
         yield files
     finally:
         [f.close() for f in files]
@@ -82,13 +85,41 @@ def prepend_feature_to_string(original_source_string, original_target_string,
     feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 
     # define the spacy model
-    lang_model = {"en": "en_core_web_sm", "de": "de_core_news_sm"}
+    lang_model1 = {"en": "en_core_web_sm", "de": "de_core_news_sm"}
+    if lang.lower() not in lang_model1:
+        print("Language choice not supported, defaulting to English (other option: German)")
+        lang = "en"
+
+    nlp_model1 = spacy.load(lang_model1[lang])
+    source_tokens = [t.text for t in nlp_model1(original_source_string) if t.text not in {" ", "  "}]
+    to_be_prepended = ""
+    for f in feature_list:
+        v = str(round(feature_value_dict[f], 2))
+        # print(f, v)
+        prep = "<" + feature2spec_token[f] + "_" + v + "> "
+        to_be_prepended += prep
+
+    new_source = to_be_prepended + " ".join(source_tokens)
+    new_target = " ".join([z.text for z in nlp_model1(original_target_string)])
+    with open(REPO_DIR / "test_tokenization_spacy.txt", "a", encoding="utf-8") as tf:
+        tf.write(new_source)
+        tf.write("\n")
+        tf.write(new_target)
+        tf.write("\n\n")
+
+    # TODO: check whether the replacement works as it should
+    # TODO: decide whether to add English back and in which way, i.e. get English ccnet spm model?
+    model_dir = data_auxiliary_dir / lang
+    lang_model = {"de": model_dir / "de.sp.model"}
     if lang.lower() not in lang_model:
         print("Language choice not supported, defaulting to English (other option: German)")
         lang = "en"
 
-    nlp_model = spacy.load(lang_model[lang])
-    source_tokens = [t.text for t in nlp_model(original_source_string) if t.text not in {" ", "  "}]
+    nlp_model = spm.SentencePieceProcessor()
+    nlp_model.load(str(lang_model[lang]))
+
+    source_tokens = nlp_model.encode_as_pieces(original_source_string)
+
     to_be_prepended = ""
     for f in feature_list:
         v = str(round(feature_value_dict[f], 2))
@@ -97,7 +128,7 @@ def prepend_feature_to_string(original_source_string, original_target_string,
         to_be_prepended += prep
 
     new_source = to_be_prepended + " ".join(source_tokens)
-    new_target = " ".join([z.text for z in nlp_model(original_target_string)])
+    new_target = " ".join(nlp_model.encode_as_pieces(original_target_string))
 
     #print("New source: ", new_source, "\n", "New target: ", new_target, "-"*10)
     return new_source, new_target

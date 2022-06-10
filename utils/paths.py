@@ -1,13 +1,12 @@
-import git
 import os
 from pathlib import Path
 from itertools import combinations, product
 
-repo = git.Repo('.', search_parent_directories=True)
-REPO_DIR = repo.working_tree_dir
+#repo = git.Repo('.', search_parent_directories=True)
+#REPO_DIR = repo.working_tree_dir
 
 
-# REPO_DIR = Path(__file__).resolve().parent.parent.parent
+REPO_DIR = Path(__file__).resolve().parent.parent
 # EXP_DIR = REPO_DIR / 'data_auxiliary'
 # print(REPO_DIR)
 
@@ -47,7 +46,9 @@ def get_experiment_dir(exp_id):
 
 
 def get_data_preprocessed_dir(lang):
-    return data_preprocessed_dir / lang
+    dir_path = data_preprocessed_dir / lang
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+    return dir_path
 
 
 def get_configs_dir(exp_id):
@@ -65,7 +66,9 @@ def get_evaluation_dir():
 def get_data_filepath(_features, phase, suffix, lang):
     feats = "_".join(_features)
     filename = f'{phase}.{suffix}'
-    return get_data_preprocessed_dir(lang) / feats / filename
+    dir_path = get_data_preprocessed_dir(lang) / feats
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+    return dir_path / filename
 
 
 def get_data_filepath_original(phase, suffix, lang):
@@ -114,4 +117,3 @@ def check_if_dir_exists_and_is_empty(dir_path):
 #import pdb; pdb.set_trace()
 
 # print(sorted(din.keys()))
-
