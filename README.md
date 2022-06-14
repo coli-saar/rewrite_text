@@ -38,7 +38,8 @@ Arguments in the preprocessing config:
    - `features`: a list of features to be extracted from the dataset. The options are dependency, frequency, length, levenshtein. It's best to run the preprocessing with feature extraction once because it is time-consuming. The features that won't be used in the experiments can be removed from files after.
    - `analyze_features`: a functionality that plots histograms for the feature values. Boolean.
    - `overwrite`: ignore this
-3) Run the preprocessing script, `python preprocess.py --config configs/preproces_dummy.yaml`. Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
+3) Prepare the directory where the newly processed data will be stored given the requested features, use `mkdir` to create e.g. `data_preprocessed/en/frequency_length` if you plan to preprocess English data and extract frequency and length features.
+4) Run the preprocessing script, `python preprocess.py --config configs/preproces_dummy.yaml`. Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
 
 
 Once finished, the preprocessed files should be located in a subdirectory of `data/en` or `data/de`. For example, if the features [dependency, frequency] were selected, the preprocessed files will be in `dependency_frequency/`.
