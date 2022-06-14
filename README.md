@@ -28,6 +28,8 @@ Download the Fasttext embeddings from this [site](https://fasttext.cc/docs/en/cr
 
 The unpreprocessed training, validation and test sets should be put in `data/en` or `data/de` with file names: `train.[src|tgt]`, `valid.[src|tgt]` and `test.[src|tgt]`.
 
+In order to use the 'sentencepiece' tokenizer (as in the original ACCESS code) you need to place a trained [SentencePiece tokenizer](https://github.com/google/sentencepiece) in the 'data_auxiliary/[en|de]' folder. We use the pretrained sentencepiece tokenizers from [here](https://github.com/facebookresearch/cc_net). 
+
 ## Preprocessing: feature extraction
 The preprocessing involves several steps:
 1) Prepare word frequency ranks. Run the function `write_ranks_into_file` from the script in `utils/prepare_word_embeddings_frequency_ranks.py`. This should create a json file in `data_auxiliary/en` (or `/de`) with `word:rank` pairs.
@@ -39,12 +41,10 @@ Arguments in the preprocessing config:
    - `analyze_features`: a functionality that plots histograms for the feature values. Boolean.
    - `overwrite`: ignore this
 3) Prepare the directory where the newly processed data will be stored given the requested features, use `mkdir` to create e.g. `data_preprocessed/en/frequency_length` if you plan to preprocess English data and extract frequency and length features.
-4) Run the preprocessing script, `python preprocess.py --config configs/preproces_dummy.yaml`. Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
+4) Run the preprocessing script, `python preprocess.py --config configs/[config_file].yaml --tokenizer [tokenizer_type]` where [tokenizer_type] can be either 'spacy' (for using the spacy lm for tokenization) or 'sentpiece' (for sentence piece tokenization). Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
 
 
 Once finished, the preprocessed files should be located in a subdirectory of `data/en` or `data/de`. For example, if the features [dependency, frequency] were selected, the preprocessed files will be in `dependency_frequency/`.
-
-Note that the original ACCESS implementation uses the `sentencepiece` tokenizer, while this code uses language-specific tokenization into words from spacy. Using a subword tokenizer could boost the performance.
 
 ## Training a sequence-to-sequence model
 For training first prepare the configuration file following the example in `configs/preprocess_train_generate_wikilarge.yaml`.
