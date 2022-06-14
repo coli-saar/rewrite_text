@@ -1,5 +1,6 @@
 import json
-from .paths import data_auxiliary_dir
+from utils.paths import get_data_auxiliary_dir
+
 
 def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
     """
@@ -27,28 +28,26 @@ def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
     print("Vocabulary size %d, most frequent token %s, least frequent token %s" % (len(ranks), first, last))
     return ranks
 
-# TODO: talks with Iza whether this is correct and then update readme probably
+
 def write_ranks_into_file(lang):
     if lang.lower() not in {"en", "de"}:
         print("Language choice not supporting, defaulting to English")
     if lang == "de":
-        embedding_path = "../data_auxiliary/de/cc.de.300.vec"
+        embedding_path = get_data_auxiliary_dir(lang) / "cc.de.300.vec"
     else:
-        embedding_path = "../data_auxiliary/en/cc.en.300.vec"
+        embedding_path = get_data_auxiliary_dir(lang) / "cc.en.300.vec"
     ranks = read_in_embeddings_return_frequency_rank_dict(embedding_path)
-    with open(f'../data_auxiliary/{lang}/frequency_ranks.json', "w") as fout:
+    with open(get_data_auxiliary_dir(lang) / 'frequency_ranks.json', "w") as fout:
         json.dump(ranks, fout)
 
 
 def load_ranks(lang):
     if lang.lower() not in {"en", "de"}:
         print("Language choice not supporting, defaulting to English")
-    if lang == "de":
-        path = data_auxiliary_dir / "de"
-        with open(path / "frequency_ranks.json") as fin:
-            ranks = json.load(fin)
-        return ranks
-    with open("../data_auxiliary/en/frequency_ranks.json") as fin:
+
+    ranking_file_path = get_data_auxiliary_dir(lang) / "frequency_ranks.json"
+
+    with open(ranking_file_path, "r", encoding="utf-8") as fin:
         ranks = json.load(fin)
     return ranks
 

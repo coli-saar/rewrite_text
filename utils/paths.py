@@ -2,10 +2,6 @@ import os
 from pathlib import Path
 from itertools import combinations, product
 
-#repo = git.Repo('.', search_parent_directories=True)
-#REPO_DIR = repo.working_tree_dir
-
-
 REPO_DIR = Path(__file__).resolve().parent.parent
 # EXP_DIR = REPO_DIR / 'data_auxiliary'
 # print(REPO_DIR)
