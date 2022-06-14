@@ -28,7 +28,7 @@ Download the Fasttext embeddings from this [site](https://fasttext.cc/docs/en/cr
 
 The unpreprocessed training, validation and test sets should be put in `data/en` or `data/de` with file names: `train.[src|tgt]`, `valid.[src|tgt]` and `test.[src|tgt]`.
 
-In order to use the 'sentencepiece' tokenizer (as in the original ACCESS code) you need to place a trained [SentencePiece tokenizer](https://github.com/google/sentencepiece) in the 'data_auxiliary/[en|de]' folder. We use the pretrained sentencepiece tokenizers from [here](https://github.com/facebookresearch/cc_net). 
+In order to use the 'sentencepiece' tokenizer (as in the original ACCESS code) you need to place a trained [SentencePiece tokenizer](https://github.com/google/sentencepiece) in the 'data_auxiliary/[en|de]' folder. We use the pretrained sentencepiece tokenizers from [here](https://github.com/facebookresearch/cc_net): Download their trained LM for English / German following the instructions in the readme (section "Training Language Models") and place the downloaded '[en|de].sp.model' file in the 'data_auxiliary/[en|de]' folder (you do not need the '[en|de].arpa.bin' file).
 
 ## Preprocessing: feature extraction
 The preprocessing involves several steps:
