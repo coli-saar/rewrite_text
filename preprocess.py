@@ -16,7 +16,7 @@ Extract features and write these files in data_preprocessed/
 
 import yaml
 import argparse
-from utils.helpers import load_yaml, yield_lines_in_parallel, prepend_feature_to_string, plot_histogram
+from utils.helpers import load_yaml, load_tokenizer, yield_lines_in_parallel, prepend_feature_to_string, plot_histogram
 from utils.paths import get_input_filepaths_dict, get_out_filepaths_dict, get_phase_suffix_pairs
 from utils.feature_extraction import feature_bins_bundle_sentence, feature_bundle_sentence
 from utils.prepare_word_embeddings_frequency_ranks import load_ranks
@@ -24,6 +24,7 @@ from utils.feature_bin_preparation import create_bins
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="yaml config file for preprocessing src and tgt")
+parser.add_argument("--tokenizer", required=True, help="the tokenizer to use for tokenizing the corpus, either 'spacy' or 'sentpiece'")
 args = vars(parser.parse_args())
 
 config = load_yaml(args["config"])
@@ -33,6 +34,9 @@ LANG = config["lang"].lower()
 lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
 splits_allowed = {"train", "valid", "test"}
+
+TOKENIZER_TYPE = args["tokenizer"]
+TOKENIZER_MODEL = load_tokenizer(TOKENIZER_TYPE, LANG)
 
 # some checks
 assert LANG in lang_allowed
@@ -52,8 +56,8 @@ frequency_ranks = load_ranks(LANG)
 def phase_open_process_write(src_tuple, tgt_tuple, in_src_PATH, in_tgt_PATH):
     """ ("phase", "src"), ("phase", "tgt") """
     # open the out files
-    new_source = open(output_file_paths[src_tuple], "w")
-    new_target = open(output_file_paths[tgt_tuple], "w")
+    new_source = open(output_file_paths[src_tuple], "w", encoding="utf-8")
+    new_target = open(output_file_paths[tgt_tuple], "w", encoding="utf-8")
 
     feature_dict_vals = {feat: [] for feat in FEATURES_REQUESTED}
 
@@ -61,14 +65,13 @@ def phase_open_process_write(src_tuple, tgt_tuple, in_src_PATH, in_tgt_PATH):
         f_vals_bin, f_vals_exact = feature_bins_bundle_sentence(src_sent, tgt_sent, LANG, FEATURES_REQUESTED,
                                                                 feature_bins, frequency_ranks)
         sent_src_new, sent_tgt_new = prepend_feature_to_string(src_sent, tgt_sent, FEATURES_REQUESTED,
-                                                               f_vals_bin, LANG, "path_to_tokenizer")
+                                                               f_vals_bin, TOKENIZER_TYPE, TOKENIZER_MODEL)
         new_source.write(sent_src_new + "\n")
         new_target.write(sent_tgt_new + "\n")
 
         if config["analyze_features"]:
             for f, v in f_vals_exact.items():
                 feature_dict_vals[f].append(v)
-
 
     # close the out files
     new_target.close()
@@ -93,4 +96,3 @@ for phase in parallel_pairs_list:
 if config["analyze_features"]:
     for f, _x in all_phases_all_feature_values.items():
         plot_histogram(_x, f, LANG)
-

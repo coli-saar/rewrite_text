@@ -1,4 +1,5 @@
 import json
+from utils.paths import get_data_auxiliary_dir
 
 
 def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
@@ -10,7 +11,7 @@ def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
     ranks = dict()
     first, last = "", ""
     j = 0
-    with open(path_to_embeddings, "r") as f:
+    with open(path_to_embeddings, "r", encoding="utf-8") as f:
         for i, word_line in enumerate(f):
             # the first line is not a word embedding
             if i == 0:
@@ -28,22 +29,29 @@ def read_in_embeddings_return_frequency_rank_dict(path_to_embeddings):
     return ranks
 
 
-def write_ranks_into_file():
-    ranks = read_in_embeddings_return_frequency_rank_dict("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/cc.en.300.vec")
-    with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json", "w") as fout:
+def write_ranks_into_file(lang):
+    if lang.lower() not in {"en", "de"}:
+        print("Language choice not supporting, defaulting to English")
+    if lang == "de":
+        embedding_path = get_data_auxiliary_dir(lang) / "cc.de.300.vec"
+    else:
+        embedding_path = get_data_auxiliary_dir(lang) / "cc.en.300.vec"
+    ranks = read_in_embeddings_return_frequency_rank_dict(embedding_path)
+    with open(get_data_auxiliary_dir(lang) / 'frequency_ranks.json', "w") as fout:
         json.dump(ranks, fout)
 
 
 def load_ranks(lang):
     if lang.lower() not in {"en", "de"}:
         print("Language choice not supporting, defaulting to English")
-    if lang == "de":
-        with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/de/frequency_ranks.json") as fin:
-            ranks = json.load(fin)
-        return ranks
-    with open("/home/AK/skrjanec/rewrite_text/data_auxiliary/en/frequency_ranks.json") as fin:
+
+    ranking_file_path = get_data_auxiliary_dir(lang) / "frequency_ranks.json"
+
+    with open(ranking_file_path, "r", encoding="utf-8") as fin:
         ranks = json.load(fin)
     return ranks
 
 
 #write_ranks_into_file()
+if __name__=="__main__":
+    write_ranks_into_file("de")

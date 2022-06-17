@@ -9,6 +9,8 @@ import spacy
 import yaml
 import matplotlib.pyplot as plt
 from utils.paths import get_data_preprocessed_dir
+import sentencepiece as spm
+from .paths import get_data_auxiliary_dir
 
 feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 
@@ -22,7 +24,7 @@ def open_files(filepaths, mode='r'):
     # this function is useful also for readily preprocessed files that have text features
     files = []
     try:
-        files = [Path(filepath).open(mode) for filepath in filepaths]
+        files = [Path(filepath).open(mode, encoding="utf-8") for filepath in filepaths]
         yield files
     finally:
         [f.close() for f in files]
@@ -65,12 +67,34 @@ def load_yaml(file_path):
         return yaml.safe_load(file)
 
 
+def load_tokenizer(tokenizer_type, lang):
+
+    if tokenizer_type not in {"spacy", "sentpiece"}:
+        print(
+            "Tokenizer choice not supported, defaulting to SentencePiece tokenizer (other option: spacy language model)"
+        )
+    if lang.lower() not in {"en", "de"}:
+        print("Language choice not supported, defaulting to English (other option: German)")
+
+    if tokenizer_type == "spacy":
+        lang_models = {"de": "de_core_news_sm", "en": "en_core_web_sm"}
+        tokenizer_model = spacy.load(lang_models[lang])
+
+    else:
+        model_dir = get_data_auxiliary_dir(lang)
+        lang_models = {"de": model_dir / "de.sp.model", "en": model_dir / "en.sp.model"}
+        tokenizer_model = spm.SentencePieceProcessor()
+        tokenizer_model.load(str(lang_models[lang]))
+
+    return tokenizer_model
+
+
 def format_control_features(feature_value, feature_token, source_string):
     pass
 
 
 def prepend_feature_to_string(original_source_string, original_target_string,
-                              feature_list, feature_value_dict, lang, path_to_tokenizer):
+                              feature_list, feature_value_dict, tokenizer_type, tokenizer_model):
     # tokenize the original source and target sentence - for now with the spacy tokenizer
     # TODO: train a sentencepiece tokenizer - before running preprocess.py
     # include the special tokens as well (as user-defined symbols)
@@ -81,26 +105,33 @@ def prepend_feature_to_string(original_source_string, original_target_string,
     # mapping: feature: special_token
     feature2spec_token = {"dependency": "MaxDep", "frequency": "FreqRank", "length": "Length", "levenshtein": "Leven"}
 
-    # define the spacy model
-    lang_model = {"en": "en_core_web_sm", "de": "de_core_news_sm"}
-    if lang.lower() not in lang_model:
-        print("Language choice not supported, defaulting to English (other option: German)")
-        lang = "en"
+    if tokenizer_type == "spacy":
+        source_tokens = run_spacy_tokenizer(original_source_string, tokenizer_model)
+        target_tokens = run_spacy_tokenizer(original_target_string, tokenizer_model)
+    else:
+        source_tokens = run_sentencepiece_tokenizer(original_source_string, tokenizer_model)
+        target_tokens = run_sentencepiece_tokenizer(original_target_string, tokenizer_model)
 
-    nlp_model = spacy.load(lang_model[lang])
-    source_tokens = [t.text for t in nlp_model(original_source_string) if t.text not in {" ", "  "}]
     to_be_prepended = ""
     for f in feature_list:
         v = str(round(feature_value_dict[f], 2))
-        #print(f, v)
         prep = "<" + feature2spec_token[f] + "_" + v + "> "
         to_be_prepended += prep
 
     new_source = to_be_prepended + " ".join(source_tokens)
-    new_target = " ".join([z.text for z in nlp_model(original_target_string)])
+    new_target = " ".join(target_tokens)
 
-    #print("New source: ", new_source, "\n", "New target: ", new_target, "-"*10)
     return new_source, new_target
+
+
+def run_spacy_tokenizer(original_string, spacy_model):
+    tokenized_string = [t.text for t in spacy_model(original_string) if t.text not in {" ", "  "}]
+    return tokenized_string
+
+
+def run_sentencepiece_tokenizer(original_string, sentpiece_model):
+    tokenized_string = sentpiece_model.encode_as_pieces(original_string)
+    return tokenized_string
 
 
 def plot_histogram(x, feature_name, lang):
