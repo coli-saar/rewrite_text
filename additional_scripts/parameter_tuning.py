@@ -15,7 +15,7 @@ MAX_EPOCHS = 90
 BEAM_SIZE = 8
 
 
-def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_id=0):
+def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_id=0, sh_script=False):
     """
     creates n_configs config files for training with the configurations from above
     and each with a different learning rate in the folder configs/parameter_tuning
@@ -28,12 +28,15 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
                     experiments are created by increasing start_id by 1 for each file
                     Note!: if a configuration file with the experiment ID already exists it
                             gets overwritten!
+    :param sh_script: whether an .sh script should be created that can be launched to run all training configurations
+                      after each other and save logs
     """
     #TODO: adapt path
     path_for_configs = Path("../configs/parameter_tuning2/")
     path_for_configs.mkdir(parents=True, exist_ok=True)
 
     lr_values = []
+    lines_for_sh = []
 
     for step, exp_id in enumerate(range(start_id, start_id + n_configs)):
         config_name = f'preprocess_train_generate_de{exp_id}.yaml'
@@ -57,6 +60,18 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
             conf_file.write(f'beam_size: {BEAM_SIZE}\n')
             conf_file.write(f'lr: {lr_value}\n')
 
+        if sh_script:
+            line = 'python fairseq_preprocess_train_generate.py --config '
+            line += str(path_for_configs)
+            line += config_name
+            line += f' |& tee training_log{exp_id}.txt\n'
+            lines_for_sh.append(line)
+
+    if sh_script:
+        with open("run_parameter_tuning.sh", "w", encoding="utf-8") as sh:
+            for line in lines_for_sh:
+                sh.write(line)
+
     print(f'Created {n_configs} configuration files with the following learning rate values: \n')
     print(f'{lr_values}')
 
@@ -66,10 +81,16 @@ if __name__=="__main__":
     parser.add_argument("--n", required=True, help="number of configuration files to create")
     parser.add_argument("--lr", required=True, help="smallest learning rate")
     parser.add_argument("--step", required=True, help="step size for increasing the learning rate for each configuration")
+    parser.add_argument("--run", required=False, help="set to True if a shell script should be created to run all "
+                                                      "configurations")
     parser.add_argument("--exp", required=False, help="experiment id for the first config file, default is 0")
 
     args = vars(parser.parse_args())
-    if args["exp"]:
+    if args["exp"] and args["run"]:
+        create_configs_lr(args["n"], args["lr"], args["step"], args["exp"], args["run"])
+    elif args["exp"]:
         create_configs_lr(args["n"], args["lr"], args["step"], args["exp"])
+    elif args["run"]:
+        create_configs_lr(args["n"], args["lr"], args["step"], args["run"])
     else:
         create_configs_lr(args["n"], args["lr"], args["step"])
