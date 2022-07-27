@@ -46,8 +46,6 @@ Arguments in the preprocessing config:
 
 Once finished, the preprocessed files should be located in a subdirectory of `data/en` or `data/de`. For example, if the features [dependency, frequency] were selected, the preprocessed files will be in `dependency_frequency/`.
 
-*Plots:* You can create histogram plots to inspect the distribution of the values for each of the features. To generate the plots run `python inspect_features.py --lang [de|en] --out [directory_path_for_plots]`. This will create plots for each of the four different features extracted during preprocessing. For each feature there will be four plots: one for the training, validation and test data split each and one for the complete corpus. Note: if you extracted less features during the preprocessing step you need to adapt the `features` variable in the main function of inspect_features.py accordingly.
-
 ## Training a sequence-to-sequence model
 For training first prepare the configuration file following the example in `configs/preprocess_train_generate_wikilarge.yaml`.
 Arguments in the training config:
@@ -90,3 +88,9 @@ Optional arguments - control token values:
 An example for running this script: 
 
 `python generate.py --experiment-id 5 --data-dir data_generation --language en --beam 5 --length 0.95 --frequency 0.75 --levenshtein 0.75`.
+
+
+## Additional Scripts
+The folder additional_scripts contains scripts that are not necessary for training and using the simplification model but that might be helpful for inspecting the data, plotting, etc. 
+
+The [Wiki](https://github.com/coli-saar/rewrite_text/wiki#preprocessing) provides further information about the individual scripts and their usage. 
