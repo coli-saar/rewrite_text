@@ -1,0 +1,6 @@
+phases: ["train", "test", "valid"]
+lang: de
+features: ["dependency", "frequency", "length", "levenshtein"]
+train_ids: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+test_ids: []
+valid_ids: []
