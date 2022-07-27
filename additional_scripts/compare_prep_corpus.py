@@ -2,13 +2,19 @@
 Function to find and count all sentences for which characters are "lost" during the
 sentence piece tokenization, i.e. where decoding the tokenized sentence after the
 feature preprocessing does not look exactly the same as the original not tokenized sentence.
+
+Can also be used to check whether the file created by merging preprocessed shards yields
+a file with exactly the same sentences in the same order as the original file contained.
 """
 
-from utils.helpers import load_tokenizer
+from utils.helpers import load_tokenizer, run_sentencepiece_tokenizer, run_spacy_tokenizer
 import argparse
+from spacy.tokens import Doc
+
 
 # TODO: explain the two different files that get created
-def compare_preprocessed_vs_original(language):
+# TODO: run with spacy tokenizer to check that it works as expected
+def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
     """
     Compares the sentences in the original data set in language 'language' to the corresponding sentences
     in the preprocessed data set with all four features.
@@ -16,12 +22,13 @@ def compare_preprocessed_vs_original(language):
     If not all splits should be checked or not all 4 features were extracted the variables 'folder_prep'
     and 'files' need to be adapted accordingly below
     :param language: 'de' or 'en' (files from feature preprocessing need to exist already)
+    :param tokenizer_type: 'spacy' or 'sentpiece'
     """
     folder_orig = f'data/{language}/'
     folder_prep = f'data_preprocessed/{language}/dependency_frequency_length_levenshtein_complete/'
     files = ["train.src", "train.tgt", "test.src", "test.tgt", "valid.src", "valid.tgt"]
 
-    tokenizer = load_tokenizer("sentpiece", "de")
+    tokenizer = load_tokenizer(tokenizer_type, language)
 
     not_matching_lines = 0
     not_matching_lines_cleaned = 0
@@ -35,21 +42,32 @@ def compare_preprocessed_vs_original(language):
 
         for i, (orig_line, prep_line) in enumerate(zip(orig, prep)):
             orig_line = orig_line.strip()
+
             prep_line = prep_line.strip()
             prep_line = prep_line.split(" ")
-
-            encoded_orig_line = tokenizer.encode_as_pieces(orig_line)
-            decoded_orig_line = tokenizer.decode(encoded_orig_line)
-
             if comp_file[-1] == "c":
-                # first four elements are the features
+                # first four elements are the features in the .src files
                 prep_line = prep_line[4:]
 
-            decoded_text = tokenizer.decode(prep_line)
+            # Texts from the original corpus get first tokenized and then decoded again
+            # in order to ignore white spaces that were removed during tokenization when
+            # comparing the texts
+            if tokenizer_type == 'sentpiece':
+                encoded_orig_line = run_sentencepiece_tokenizer(orig_line, tokenizer)
+                decoded_orig_line = tokenizer.decode(encoded_orig_line)
+
+                decoded_text = tokenizer.decode(prep_line)
+
+            else:
+                encoded_orig_line = run_spacy_tokenizer(orig_line, tokenizer)
+                decoded_orig_line = Doc(tokenizer.vocab, words=encoded_orig_line).text
+
+                decoded_text = Doc(tokenizer.vocab, words=prep_line).text
 
             orig_tokens = decoded_orig_line.split(" ")
             decoded_tokens = decoded_text.split(" ")
 
+            # check whether lines are missing or have a different order after preprocessing
             if not orig_tokens == decoded_tokens:
                 not_matching_lines_cleaned += 1
                 print("Found non matching lines:")

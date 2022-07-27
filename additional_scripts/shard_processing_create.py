@@ -66,7 +66,7 @@ def split_phase_data(lang: str, l_per_s: int, phase='train', skip=0):
     :param phase: the data set split that should be split into shards, default is to split the training split further
     :param skip: the number of lines to skip at the beginning of the corpus file, e.g. if the first 1000 lines should
                 not be included in the shard because they were already preprocessed set skip=1000
-                if provided then the enumeration of the shards starts at 0 instead of at 0
+                if provided then the enumeration of the shards starts at 1 instead of at 0
     """
     source_file = f'{phase}.src'
     target_file = f'{phase}.tgt'
