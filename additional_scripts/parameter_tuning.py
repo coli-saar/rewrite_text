@@ -31,8 +31,7 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
     :param sh_script: whether an .sh script should be created that can be launched to run all training configurations
                       after each other and save logs
     """
-    #TODO: adapt path
-    path_for_configs = Path("../configs/parameter_tuning2/")
+    path_for_configs = Path("../configs/parameter_tuning/")
     path_for_configs.mkdir(parents=True, exist_ok=True)
 
     lr_values = []
@@ -51,7 +50,7 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
             conf_file.write(f'generate: {GENERATE}\n')
             conf_file.write(f'experiment_id: {exp_id}\n')
             conf_file.write(f'features_requested: {FEATURES_REQUESTED}\n')
-            conf_file.write(f'lang: {LANGUAGE}\n')
+            conf_file.write(f'language: {LANGUAGE}\n')
             conf_file.write(f'arch: {ARCH}\n')
             conf_file.write(f'optimizer: {OPTIMIZER}\n')
             conf_file.write(f'batch_size: {BATCH_SIZE}\n')
@@ -87,10 +86,18 @@ if __name__=="__main__":
 
     args = vars(parser.parse_args())
     if args["exp"] and args["run"]:
-        create_configs_lr(args["n"], args["lr"], args["step"], args["exp"], args["run"])
+        if args["run"] == "True":
+            r = True
+        else:
+            r = False
+        create_configs_lr(n_configs=int(args["n"]), start_lr=float(args["lr"]), step_size=float(args["step"]), start_id=int(args["exp"]), sh_script=r)
     elif args["exp"]:
-        create_configs_lr(args["n"], args["lr"], args["step"], args["exp"])
+        create_configs_lr(n_configs=int(args["n"]), start_lr=float(args["lr"]), step_size=float(args["step"]), start_id=int(args["exp"]))
     elif args["run"]:
-        create_configs_lr(args["n"], args["lr"], args["step"], args["run"])
+        if args["run"] == "True":
+            r = True
+        else:
+            r = False
+        create_configs_lr(n_configs=int(args["n"]), start_lr=float(args["lr"]), step_size=float(args["step"]), sh_script=r)
     else:
-        create_configs_lr(args["n"], args["lr"], args["step"])
+        create_configs_lr(n_configs=int(args["n"]), start_lr=float(args["lr"]), step_size=float(args["step"]))

@@ -9,6 +9,7 @@ a file with exactly the same sentences in the same order as the original file co
 
 from utils.helpers import load_tokenizer, run_sentencepiece_tokenizer, run_spacy_tokenizer
 import argparse
+from pathlib import Path
 from spacy.tokens import Doc
 
 
@@ -25,8 +26,15 @@ def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
     :param tokenizer_type: 'spacy' or 'sentpiece'
     """
     folder_orig = f'data/{language}/'
-    folder_prep = f'data_preprocessed/{language}/dependency_frequency_length_levenshtein_complete/'
+    folder_prep = f'data_preprocessed/{language}/dependency_frequency_length_levenshtein/'
     files = ["train.src", "train.tgt", "test.src", "test.tgt", "valid.src", "valid.tgt"]
+
+    characters_dropped = './different_after_tokenization.txt'
+    other_differences = './different_after_preprocessing.txt'
+    if Path(characters_dropped).exists() or Path(other_differences).exists():
+        print("Warning: At least of of the files './different_after_tokenization.txt' and './different_after_preprocessing.txt' "
+              "does already exist. Please remove or rename the files and run again.")
+        return
 
     tokenizer = load_tokenizer(tokenizer_type, language)
 
@@ -75,7 +83,9 @@ def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
                 print(str(i+1))
                 print(orig_tokens)
                 print(decoded_tokens)
-                with open("./not_match.txt", "a", encoding="utf-8") as nm:
+                with open(other_differences, "a", encoding="utf-8") as nm:
+                    nm.write(comp_file)
+                    nm.write("\n")
                     nm.write(orig_line)
                     nm.write("\n")
                     nm.write(decoded_text)
@@ -84,7 +94,7 @@ def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
             # check for which sentences the tokenization dropped characters / changed the text
             if not orig_line.split(" ") == decoded_tokens:
                 not_matching_lines += 1
-                with open("./not_match_before_tokenization.txt", "a", encoding="utf-8") as nm:
+                with open(characters_dropped, "a", encoding="utf-8") as nm:
                     nm.write(comp_file)
                     nm.write("\n")
                     nm.write(orig_line)
@@ -103,6 +113,6 @@ if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--l", required=True, help="language of the corpus")
+    parser.add_argument("--tokenizer", required=True, help="type of tokenizer that was used for preprocessing, 'spacy' or 'sentpiece'")
     args = vars(parser.parse_args())
-    compare_preprocessed_vs_original(args["l"])
-
+    compare_preprocessed_vs_original(args["l"], args["tokenizer"])

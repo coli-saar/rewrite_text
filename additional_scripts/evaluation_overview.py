@@ -3,6 +3,8 @@ Script to create a table with an overview over all training runs, i.e. the
 parameters used for training and the evaluation results
 """
 import json
+import os
+
 from utils.helpers import load_yaml
 import argparse
 from os import listdir
@@ -33,14 +35,34 @@ def create_eval_overview(out_file: str, experiments: list):
         result_file.write(';'.join(header))
         result_file.write("\n")
 
-        # write one line for each experiment run
-        for exp in experiments:
+        # one line per experiment
+        for config_file in os.listdir('../configs/parameter_tuning'):
+            name, ending = config_file.split('.')
+            exp_id = ''
+            char_ind = -1
+            while True:
+                try:
+                    exp_id += str(int(name[char_ind]))
+                    char_ind -= 1
+                except:
+                    break
+            exp = exp_id[::-1]
+
+            if exp not in experiments:
+                continue
+
             # parameters values are specified in the config file
-            config_path = f'../configs/parameter_tuning/preprocess_train_generate_de{exp}.yaml'
+            config_path = f'../configs/parameter_tuning/{name}{exp}.{ending}'
             config_file = load_yaml(config_path)
 
             # evaluation scores are in the output files from the training
             eval_path = f'../experiments/{exp}/checkpoints/evaluation.txt'
+
+            # make sure that a trained model exists for the current configuration file:
+            if exp not in os.listdir('../experiments'):
+                print(f'No trained model found for experiment ID {exp}. Configuration file {config_file} will be skipped')
+                continue
+
             with open(eval_path, "r", encoding="utf-8") as eval_f:
                 metrics = eval_f.readline()
                 metrics = metrics.strip()
