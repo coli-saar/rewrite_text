@@ -106,6 +106,7 @@ An example for running this script:
 
 `python generate.py --experiment-id 5 --data-dir data_generetaion --language en --beam 5 --length 0.95 --frequency 0.75 --levenshtein 0.75`.
 
+**Note**: By default, the text in the source test.txt file will be tokenized using the sentencepiece tokenizer. If the model used for generation was trained on data preprocessed using spacy add `--spacy` at the end of the command to run the generation script.
 
 ## Additional Scripts
 The folder additional_scripts contains scripts that are not necessary for training and using the simplification model but that might be helpful for inspecting the data, plotting, etc. 
