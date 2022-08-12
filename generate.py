@@ -26,7 +26,7 @@ from utils.helpers import parse_model_hypotheses, log_stdout
 parser = argparse.ArgumentParser()
 # parser.add_argument("--model-dir", required=True, help="dir with the checkpoint_best.pt model")
 parser.add_argument("--experiment-id", required=True, help="ID of the experiment, checkpoint_best.pt will be used")
-parser.add_argument("--data-dir", required=True, help="dir with test SRC file")
+parser.add_argument("--data-dir", required=True, help="dir with the test.txt file to rewrite")
 parser.add_argument("--language", required=True, help="the language of input text, options: en, de")
 parser.add_argument("--beam", required=True, help="beam size, default 8", default=8, type=int)
 parser.add_argument("--dependency", required=False, help="maximum dependency tree depth ratio, from 0.05 to 2.45")
@@ -64,17 +64,17 @@ if not os.path.exists(model_dir):
     sys.exit("Error: This model directory does not exist" + str(model_dir))
 
 data_dir = Path(get_repo_dir()) / args["data_dir"]
-#data_dir = Path(args["data_dir"])
 src_file_path = data_dir / "test.txt"
-#suffix = args["experiment_id"] + "_test.src"
-#suffix = "test.src"
+
 suffix = "test.src-tgt.src"
-source_lang = "src"
-target_lang = "tgt"
+#prep_src_file_name = args["source-file"].split('.')[:-1]    # remove file ending from input source file
+#prep_src_file_name = '.'.join(prep_src_file_name) + suffix  # and add new suffix .src-tgt.src to file name
 src_file_destin = data_dir / suffix
 if not os.path.exists(data_dir):
     sys.exit("Error: This data directory does not exist" + str(data_dir))
 
+source_lang = "src"
+target_lang = "tgt"
 
 # copy the vocabulary dict.* files from the model_dir into the same dir as the test src file
 copy_vocab_files(origin_dir=model_dir, destination_dir=data_dir)
@@ -84,7 +84,7 @@ copy_vocab_files(origin_dir=model_dir, destination_dir=data_dir)
 # to each line prepend the feature values
 # save the file into experiment_id_test.src-tgt.src
 special_token_str = prepare_special_token_string(features_values, feature2spec_token)
-preprocess_src_file(src_file_path, src_file_destin, special_token_str)
+preprocess_src_file(src_file_path, src_file_destin, special_token_str, args['language'])
 
 
 # GENERATING: INFERENCE #
