@@ -9,6 +9,7 @@ REPO_DIR = Path(__file__).resolve().parent.parent
 data_original_dir = Path(REPO_DIR) / "data"
 data_preprocessed_dir = Path(REPO_DIR) / "data_preprocessed"
 data_auxiliary_dir = Path(REPO_DIR) / "data_auxiliary"
+data_shard_dir = Path(REPO_DIR) / "data_shards"
 configs_dir = Path(REPO_DIR) / "configs"
 experiments_dir = Path(REPO_DIR) / "experiments"
 
@@ -55,6 +56,13 @@ def get_data_auxiliary_dir(lang):
     return data_auxiliary_dir / lang
 
 
+def get_data_shard_dir(lang):
+    Path(data_shard_dir).mkdir(parents=True, exist_ok=True)
+    lang_path = data_shard_dir / lang
+    Path(lang_path).mkdir(parents=True, exist_ok=True)
+    return lang_path
+
+
 def get_evaluation_dir():
     return evaluation_dir
 
@@ -95,6 +103,33 @@ def get_phase_suffix_pairs():
     return file_pairs  # [ [("train", "src), ("train", "tgt")], ... ]
 
 
+# functions to get the folders and paths for the splitted corpus
+
+def get_out_shardpath_dict(shard_name, lang, requested_features):
+    path_dict = dict()
+    parent_dir_path = get_data_shard_dir(lang) / "preprocessed"
+    feats = "_".join(requested_features)
+    dir_path = parent_dir_path / feats
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+
+    for suffix in suffixes:
+        file_name = f'{shard_name}.{suffix}'
+        path_dict[(shard_name, suffix)] = dir_path / file_name
+
+    return path_dict
+
+
+def get_input_shardpath_dict(shard_name, lang):
+    path_dict = dict()
+    dir_path = get_data_shard_dir(lang) / "original"
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+    for suffix in suffixes:
+        file_name = f'{shard_name}.{suffix}'
+        path_dict[(shard_name, suffix)] = dir_path / file_name
+    return path_dict
+
+
+
 def check_if_dir_exists_and_is_empty(dir_path):
     # if the path to dir exists, delete its contents
     if os.path.exists(dir_path):
@@ -102,6 +137,7 @@ def check_if_dir_exists_and_is_empty(dir_path):
     # if the dir doesn't exist create it
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
 
 #di = get_out_filepaths_dict("de", ["dependency", "frequency", "length"])
 # ('train', 'src'): PosixPath('/home/skrjanec/rewrite_text/data_preprocessed/de/dependency_frequency_length/train.src')
