@@ -70,7 +70,10 @@ Arguments in the training config:
 - `arch`: currently only the Transformer is implemented
 - `optimizer`: currently only Adam is supported
 - `batch_size`: integer. Batch size during training.
+- `update_freq`: integer. Number of batches of which the gradients get accumulated before updating the parameters. If set to 1 then the model is updated after each batch, if set to a larger value this increases the effective batchsize to `batch_size` * `update_freq`.
 - `test_batch_size`: integer. Batch size during testing.
+- `max_epochs`: integer. Maximum number of epochs to train the model.
+- `patience`: integer. If validation performance does not improve for `patience` successive validations then early stopping is executed. Set to -1 if no early stopping should be happen.
 - `beam_size`: integer. Beam size for inference at the testing step.
 - `lr`: float. learning rate.
 
