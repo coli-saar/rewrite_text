@@ -59,7 +59,7 @@ Depending on the dataset size and the features this step might take some time, s
 Once finished, the preprocessed files should be located in a subdirectory of `data/en` or `data/de`. For example, if the features [dependency, frequency] were selected, the preprocessed files will be in `dependency_frequency/`.
 
 ## Training a sequence-to-sequence model
-For training first prepare the configuration file following the example in `configs/preprocess_train_generate_wikilarge.yaml`.
+For training first prepare the configuration file following the example in `configs/preprocess_train_generate_example.yaml`.
 Arguments in the training config:
 - `preprocess`: Boolean. Creating a vocabulary or not.
 - `train`: Boolean. Train a model or not.
@@ -77,8 +77,8 @@ Arguments in the training config:
 - `beam_size`: integer. Beam size for inference at the testing step.
 - `lr`: float. learning rate.
 
-
-Run the script with `python fairseq_preprocess_train_generate.py --config configs/preprocess_train_generate_wikilarge.yaml`.
+Run the script with `python fairseq_preprocess_train_generate.py --config configs/preprocess_train_generate_example.yaml`.<br>
+See the (Wiki)[https://github.com/coli-saar/rewrite_text/wiki/Optional-Scripts-Tuning] for optional helpers for hyperparameter tuning. 
 
 Note that the original ACCESS code uses early stopping using the SARI metrics, but this implementation doesn't.
 
