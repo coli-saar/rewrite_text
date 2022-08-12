@@ -9,9 +9,6 @@ from utils.paths import get_data_preprocessed_dir, get_evaluation_dir
 from utils.helpers import log_stdout, yield_lines, parse_model_hypotheses
 
 import torch.distributed as dist
-#dist.init_process_group('gloo', init_method='file:///tmp/somefile', rank=0, world_size=1)   # TODO
-
-#print(get_data_preprocessed_dir("en"))
 
 
 def preprocess_with_fairseq(data_directory,
@@ -22,7 +19,7 @@ def preprocess_with_fairseq(data_directory,
                             trainpref="train",
                             validpref="valid",
                             testpref="test"):
-    #ddir = "/home/AK/skrjanec/toydata/data/"
+
     full_train_prefix = data_directory / trainpref
     full_valid_prefix = data_directory / validpref
     full_test_prefix = data_directory / testpref
@@ -51,6 +48,8 @@ def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
                        lr=0.002,
                        arch="transformer",
                        max_epoch=10,
+                       updates=1,
+                       patience=-1,
                        optimizer="adam",
                        dir_checkpoints_suffix="checkpoints",
                        source_lang="src",
@@ -70,16 +69,14 @@ def train_with_fairseq(dir_with_preprocessed_files, experiment_dir,
     # /home/skrjanec/rewrite_text/experiments/03/checkpoints
     if not os.path.exists(save_dir_full_path):
         os.makedirs(save_dir_full_path)
+
     mini_args = [dir_with_preprocessed_files, "--arch", arch, "--max-epoch", max_epoch, "--source-lang",
                  source_lang, "--target-lang", target_lang, "--save-dir", save_dir_full_path,
-                 "--batch-size", batch_size, "--dataset-impl", dataset_implementation, "--task", "translation",
-                 "--optimizer", optimizer, "--lr", lr, "--criterion", "label_smoothed_cross_entropy",
-                 "--label-smoothing", 0.54, "--no-epoch-checkpoints"]
+                 "--batch-size", batch_size, "--update-freq", updates, "--dataset-impl", dataset_implementation,
+                 "--task", "translation", "--optimizer", optimizer, "--lr", lr, "--patience", patience,
+                 "--criterion", "label_smoothed_cross_entropy", "--label-smoothing", 0.54, "--no-epoch-checkpoints"]
 
-    # mini_args = ["/home/AK/skrjanec/toydata/data_bin/", "--arch", "transformer", "--max-epoch", "5", "--source-lang",
-    #              source_lang, "--target-lang", target_lang, "--save-dir", "/home/AK/skrjanec/toydata/experiments/01/checkpoints/",
-    #              "--batch-size", batch_size, "--dataset-impl", dataset_implementation, "--task", "translation",
-    #              "--no-epoch-checkpoints"]
+
 
     mini_args = [str(a) for a in mini_args]
     train_parser = options.get_training_parser()
