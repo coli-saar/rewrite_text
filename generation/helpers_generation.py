@@ -2,7 +2,7 @@ import numpy as np
 import shutil
 from utils.feature_bin_preparation import create_bins
 from utils.feature_extraction import get_bin_value
-from utils.helpers import yield_lines
+from utils.helpers import yield_lines, load_tokenizer, run_sentencepiece_tokenizer, run_spacy_tokenizer
 
 
 def prepare_special_token_string(features_values_dict, feature2token):
@@ -15,13 +15,17 @@ def prepare_special_token_string(features_values_dict, feature2token):
     return s
 
 
-def preprocess_src_file(source_path, destination_path, special_token_str):
+def preprocess_src_file(source_path, destination_path, special_token_str, lang):
     # open the destination file
     destin_source = open(destination_path, "w")
+    # load the tokenizer
+    tokenizer_model = load_tokenizer('sentpiece', lang)
     # yield lines
-    # prepend the
     for line in yield_lines(source_path):
-        p = special_token_str + line + "\n" # has \n at the end
+        # tokenize line
+        tokenized_line = run_sentencepiece_tokenizer(line, tokenizer_model)
+        # prepend the special tokens
+        p = special_token_str + ' '.join(tokenized_line) + "\n" # has \n at the end
         destin_source.write(p)
     destin_source.close()
     print("Wrote file ", str(destination_path))
