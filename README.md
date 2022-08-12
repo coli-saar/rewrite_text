@@ -71,11 +71,10 @@ Note that the original ACCESS code uses early stopping using the SARI metrics, b
 In the step above, the generation/inference uses the gold control token values. In contrast, this step allows for a free choice of control token values.
 
 The control token values are given as arguments to the script `generate.py`.
-Before running the script, make sure to put the source file into `data_generation` and name it `test.src-tgt.src`.
 
 Required arguments of the script:
-- `experiment_id`: ID of the experiment where th model was trained.
-- `data_dir`: directory with the test.src-tgt.src file
+- `experiment_id`: Experiment ID of the trained model, i.e. the name of the folder in`./experiments` containing the `checkpoint` folder with the trained checkpoint (`checkpoint_best.pt`) and the vocabulary files created during training
+- `data_dir`: directory with the source file containing the sentences to rewrite 
 - `language`: the language of the src file and the model, either `en` or `de`
 - `beam`: beam size
 
