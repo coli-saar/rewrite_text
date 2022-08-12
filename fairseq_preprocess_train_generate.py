@@ -11,7 +11,6 @@ import argparse
 import os
 import subprocess
 from utils.helpers import match_dir_with_features, load_yaml
-from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq
 from utils.paths import get_data_preprocessed_dir, get_experiment_dir, check_if_dir_exists_and_is_empty, get_evaluation_dir
 from with_fairseq.fairseq_base import preprocess_with_fairseq, train_with_fairseq, generate_with_fairseq, evaluation_automatic_metrics
 from evaluation.feature_match_evaluate import parse_file_pair_return_analysis
@@ -32,8 +31,12 @@ PREPROCESS, TRAIN, GENERATE = config["preprocess"], config["train"], config["gen
 # LANG = "en"
 # FEATURES_REQUESTED = ["dependency", "frequency", "length"]
 # HYPERPARAMETERS
+
 hyper = {"lr": float(config["lr"]), "batch_size": int(config["batch_size"]),
-         "test_batch_size": int(config["test_batch_size"]), "beam_size": int(config["beam_size"])}
+         "test_batch_size": int(config["test_batch_size"]), "beam_size": int(config["beam_size"]),
+         "update_freq": int(config["update_freq"]), "max_epochs": int(config["max_epochs"]),
+         "patience": int(config["patience"])}
+
 
 lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
@@ -64,7 +67,6 @@ if PREPROCESS:
                             destination_directory=destination_dir_fairseq_preprocessing)
 
 
-
 # if train
 if TRAIN:
     print("... STEP: TRAINING")
@@ -75,7 +77,8 @@ if TRAIN:
 
     train_with_fairseq(dir_with_preprocessed_files=destination_dir_fairseq_preprocessing,
                        experiment_dir=experiment_dir_full, dir_checkpoints_suffix=checkpoint_suffix,
-                       lr=hyper["lr"], batch_size=hyper["batch_size"])
+                       lr=hyper["lr"], batch_size=hyper["batch_size"], max_epoch=hyper["max_epochs"],
+                       updates=hyper["update_freq"], patience=hyper["patience"])
 
 
 # if generate
@@ -84,7 +87,8 @@ if GENERATE:
     checkpoint_suffix = "checkpoints"
     experiment_checkpoint_dir_full = get_experiment_dir(EXP_ID) / checkpoint_suffix
     generate_with_fairseq(dir_with_test_data_and_vocab=destination_dir_fairseq_preprocessing,
-                          dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full)
+                          dir_with_model_test_data_and_vocab=experiment_checkpoint_dir_full,
+                          batch_size=args["test_batch_size"], beam_size=args["beam_size"])
 
     torch.cuda.empty_cache()  # will this help with the OOM?
     # evaluate with EASSE for BLEU, SARI, FKGL and BERTScore, tokenize with Moses.
