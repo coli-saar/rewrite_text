@@ -32,17 +32,29 @@ In order to use the 'sentencepiece' tokenizer (as in the original ACCESS code) y
 
 ## Preprocessing: feature extraction
 The preprocessing involves several steps:
-1) Prepare word frequency ranks. Run the function `write_ranks_into_file` from the script in `utils/prepare_word_embeddings_frequency_ranks.py`. This should create a json file in `data_auxiliary/en` (or `/de`) with `word:rank` pairs.
-2) Prepare a configuration file for preprocessing following the example in `configs/preprocess_dummy.yaml`
+1) Prepare word frequency ranks: <br>
+Run the function `write_ranks_into_file` from the script in `utils/prepare_word_embeddings_frequency_ranks.py`. This should create a json file in `data_auxiliary/en` (or `/de`) with `word:rank` pairs.
+
+2) Prepare a configuration file for preprocessing: <br>
+The configuration file should follow the example in `configs/preprocess_dummy.yaml` <br>
 Arguments in the preprocessing config:
    - `experiment_id`: ignore this
    - `lang`: the language of the dataset, either `en` or `de` supported for now
-   - `features`: a list of features to be extracted from the dataset. The options are dependency, frequency, length, levenshtein. It's best to run the preprocessing with feature extraction once because it is time-consuming. The features that won't be used in the experiments can be removed from files after.
+   - `features`: a list of features to be extracted from the dataset. The options are dependency, frequency, length, levenshtein. 
    - `analyze_features`: a functionality that plots histograms for the feature values. Boolean.
    - `overwrite`: ignore this
-3) Prepare the directory where the newly processed data will be stored given the requested features, use `mkdir` to create e.g. `data_preprocessed/en/frequency_length` if you plan to preprocess English data and extract frequency and length features.
-4) Run the preprocessing script, `python preprocess.py --config configs/[config_file].yaml --tokenizer [tokenizer_type]` where [tokenizer_type] can be either 'spacy' (for using the spacy lm for tokenization) or 'sentpiece' (for sentence piece tokenization). Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
+It's best to run the preprocessing with feature extraction for all four features once because it is time-consuming. The features that won't be used in the experiments can be removed from files after.
+   
+3) Prepare output directory: <br>
+Create the directory where the newly processed data will be stored given the requested features (and the parent directories if needed). The directory name should be the name of the extracted features in alphabetical order, separated by '_'. This directory should be created at the following place: `[repository_directory]/data_preprocessed/[lang]`.  For example, use `mkdir` to create `data_preprocessed/en/frequency_length` if you plan to preprocess English data and extract frequency and length features.
 
+4) Preprocess corpus: <br>
+Run the preprocessing script, `python preprocess.py --config configs/[config_file].yaml --tokenizer [tokenizer_type] --shard [shard_name]` where
+   - `config_file`: name of the configuration file
+   - `tokenizer_type`: optional, can be either 'spacy' (for using the spacy lm for tokenization) or 'sentpiece' (for sentence piece tokenization); default is 'sentpiece'
+   - `shard_name`: optional, can be used to process only a part of the corpus instead of processing the target and source files of the train, test and validation split together, see the [Wiki](https://github.com/coli-saar/rewrite_text/wiki/Optional-Scripts-Preprocessing) for more information about the usage.
+
+Depending on the dataset size and the features this step might take some time, so it's best to run it with `nohup` or `screen`.
 
 Once finished, the preprocessed files should be located in a subdirectory of `data/en` or `data/de`. For example, if the features [dependency, frequency] were selected, the preprocessed files will be in `dependency_frequency/`.
 
