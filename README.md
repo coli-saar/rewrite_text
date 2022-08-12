@@ -80,7 +80,7 @@ Arguments in the training config:
 Run the script with `python fairseq_preprocess_train_generate.py --config configs/preprocess_train_generate_example.yaml`.<br>
 Note that the logging information for the training will not be redirected to a file but printed to the command line. To store the information in a file add `> log_file.txt` at the end of the command to run the training script.
 
-See the (Wiki)[https://github.com/coli-saar/rewrite_text/wiki/Optional-Scripts-Tuning] for optional helpers for hyperparameter tuning. 
+See the [Wiki](https://github.com/coli-saar/rewrite_text/wiki/Optional-Scripts-Tuning) for optional helpers for hyperparameter tuning. 
 
 Note that the original ACCESS code uses early stopping using the SARI metrics, but this implementation doesn't.
 
