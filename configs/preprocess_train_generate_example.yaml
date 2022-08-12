@@ -1,0 +1,15 @@
+preprocess: True
+train: True
+generate: True
+experiment_id: 0
+features_requested: ['dependency', 'frequency', 'length', 'levenshtein']
+language: de
+arch: "transformer"
+optimizer: "adam"
+batch_size: 16
+update_freq: 1
+test_batch_size: 16
+max_epochs: 90
+patience: 10
+beam_size: 8
+lr: 0.00011
