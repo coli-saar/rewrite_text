@@ -6,15 +6,14 @@ feature preprocessing does not look exactly the same as the original not tokeniz
 Can also be used to check whether the file created by merging preprocessed shards yields
 a file with exactly the same sentences in the same order as the original file contained.
 """
-
 from utils.helpers import load_tokenizer, run_sentencepiece_tokenizer, run_spacy_tokenizer
+from utils.paths import data_original_dir, data_preprocessed_dir, additional_script_dir
 import argparse
 from pathlib import Path
 from spacy.tokens import Doc
+from tqdm import tqdm
 
 
-# TODO: explain the two different files that get created
-# TODO: run with spacy tokenizer to check that it works as expected
 def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
     """
     Compares the sentences in the original data set in language 'language' to the corresponding sentences
@@ -25,15 +24,15 @@ def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
     :param language: 'de' or 'en' (files from feature preprocessing need to exist already)
     :param tokenizer_type: 'spacy' or 'sentpiece'
     """
-    folder_orig = f'data/{language}/'
-    folder_prep = f'data_preprocessed/{language}/dependency_frequency_length_levenshtein/'
+    folder_orig = f'{data_original_dir}/{language}/'
+    folder_prep = f'{data_preprocessed_dir}/{language}/dependency_frequency_length_levenshtein/'
     files = ["train.src", "train.tgt", "test.src", "test.tgt", "valid.src", "valid.tgt"]
 
-    characters_dropped = './different_after_tokenization.txt'
-    other_differences = './different_after_preprocessing.txt'
+    characters_dropped = f'{additional_script_dir}/different_after_tokenization.txt'
+    other_differences = f'{additional_script_dir}./different_after_preprocessing.txt'
     if Path(characters_dropped).exists() or Path(other_differences).exists():
-        print("Warning: At least of of the files './different_after_tokenization.txt' and './different_after_preprocessing.txt' "
-              "does already exist. Please remove or rename the files and run again.")
+        print("Warning: At least one of the files './different_after_tokenization.txt' and "
+              "'./different_after_preprocessing.txt' does already exist. Please remove or rename the files and run again.")
         return
 
     tokenizer = load_tokenizer(tokenizer_type, language)
@@ -48,7 +47,7 @@ def compare_preprocessed_vs_original(language: str, tokenizer_type:  str):
         orig = open(orig_file, "r", encoding="utf-8")
         prep = open(prep_file, "r", encoding="utf-8")
 
-        for i, (orig_line, prep_line) in enumerate(zip(orig, prep)):
+        for i, (orig_line, prep_line) in tqdm(enumerate(zip(orig, prep))):
             orig_line = orig_line.strip()
 
             prep_line = prep_line.strip()

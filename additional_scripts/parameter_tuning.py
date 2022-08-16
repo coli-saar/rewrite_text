@@ -1,5 +1,6 @@
 from pathlib import Path
 import argparse
+from utils.paths import configs_dir
 
 # Parameters that are kept the same for all training runs
 PREPROCESS = True
@@ -9,9 +10,11 @@ FEATURES_REQUESTED = ["dependency", "frequency", "length", "levenshtein"]
 LANGUAGE = 'de'
 ARCH = '"transformer"'
 OPTIMIZER = '"adam"'
-BATCH_SIZE = 16 # max batch size working on the jones-X without memory issues
+BATCH_SIZE = 16     # max batch size working on the jones-X without memory issues
+UPDATE_FREQ = 4     # to get an effective batch size of 64
 TEST_BATCH_SIZE = 16
 MAX_EPOCHS = 90
+PATIENCE = 10
 BEAM_SIZE = 8
 
 
@@ -31,8 +34,9 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
     :param sh_script: whether an .sh script should be created that can be launched to run all training configurations
                       after each other and save logs
     """
-    path_for_configs = Path("../configs/parameter_tuning/")
-    path_for_configs.mkdir(parents=True, exist_ok=True)
+    path_for_configs = f'{configs_dir}/parameter_tuning/'       # relative to current script
+    Path(path_for_configs).mkdir(parents=True, exist_ok=True)
+    path_for_configs_run = f'{configs_dir}/parameter_tuning/'  # needs to be relative to the fairseq_preprocess_train_generate.py script
 
     lr_values = []
     lines_for_sh = []
@@ -41,10 +45,10 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
         config_name = f'preprocess_train_generate_de{exp_id}.yaml'
 
         lr_value = start_lr + step * step_size
-        lr_value = round(lr_value, 5)
+        lr_value = round(lr_value, 6)
         lr_values.append(lr_value)
 
-        with open(path_for_configs / config_name, "w", encoding="utf-8") as conf_file:
+        with open(path_for_configs + config_name, "w", encoding="utf-8") as conf_file:
             conf_file.write(f'preprocess: {PREPROCESS}\n')
             conf_file.write(f'train: {TRAIN}\n')
             conf_file.write(f'generate: {GENERATE}\n')
@@ -54,20 +58,23 @@ def create_configs_lr(n_configs: int, start_lr: float, step_size: float, start_i
             conf_file.write(f'arch: {ARCH}\n')
             conf_file.write(f'optimizer: {OPTIMIZER}\n')
             conf_file.write(f'batch_size: {BATCH_SIZE}\n')
+            conf_file.write(f'update_freq: {UPDATE_FREQ}\n')
             conf_file.write(f'test_batch_size: {TEST_BATCH_SIZE}\n')
             conf_file.write(f'max_epochs: {MAX_EPOCHS}\n')
+            conf_file.write(f'patience: {PATIENCE}\n')
             conf_file.write(f'beam_size: {BEAM_SIZE}\n')
             conf_file.write(f'lr: {lr_value}\n')
 
         if sh_script:
             line = 'python fairseq_preprocess_train_generate.py --config '
-            line += str(path_for_configs)
+            line += path_for_configs_run
             line += config_name
-            line += f' |& tee training_log{exp_id}.txt\n'
+            line += f' |& tee training_logs/training_log{exp_id}.txt\n'
             lines_for_sh.append(line)
 
     if sh_script:
-        with open("run_parameter_tuning.sh", "w", encoding="utf-8") as sh:
+        print('Created sh script')
+        with open("../run_parameter_tuning.sh", "w", encoding="utf-8") as sh:
             for line in lines_for_sh:
                 sh.write(line)
 
