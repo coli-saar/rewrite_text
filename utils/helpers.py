@@ -59,10 +59,9 @@ def yield_lines_in_parallel(filepaths, strip=True, strict=True, n_lines=float('i
 #     print(a)
 #     print(b)
 
-# TODO write code for writing into files (preprocessed and equipped with features)
-
 
 def load_yaml(file_path):
+    file_path = file_path.strip()
     with open(file_path, "r") as file:
         return yaml.safe_load(file)
 
@@ -95,8 +94,7 @@ def format_control_features(feature_value, feature_token, source_string):
 
 def prepend_feature_to_string(original_source_string, original_target_string,
                               feature_list, feature_value_dict, tokenizer_type, tokenizer_model):
-    # tokenize the original source and target sentence - for now with the spacy tokenizer
-    # TODO: train a sentencepiece tokenizer - before running preprocess.py
+    # tokenize the original source and target sentence
     # include the special tokens as well (as user-defined symbols)
     # https://github.com/google/sentencepiece/blob/master/doc/special_symbols.md
     # Multiple files can be used to train it https://github.com/google/sentencepiece/issues/489

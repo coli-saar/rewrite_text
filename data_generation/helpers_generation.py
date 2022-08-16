@@ -15,18 +15,15 @@ def prepare_special_token_string(features_values_dict, feature2token):
     return s
 
 
-def preprocess_src_file(source_path, destination_path, special_token_str, lang, tokenizer):
+def preprocess_src_file(source_path, destination_path, special_token_str, lang):
     # open the destination file
     destin_source = open(destination_path, "w", encoding="utf-8")
     # load the tokenizer
-    tokenizer_model = load_tokenizer(tokenizer, lang)
+    tokenizer_model = load_tokenizer('sentpiece', lang)
     # yield lines
     for line in yield_lines(source_path):
         # tokenize line
-        if tokenizer == 'sentpiece':
-            tokenized_line = run_sentencepiece_tokenizer(line, tokenizer_model)
-        else:
-            tokenized_line = run_spacy_tokenizer(line, tokenizer_model)
+        tokenized_line = run_sentencepiece_tokenizer(line, tokenizer_model)
         # prepend the special tokens
         p = special_token_str + ' '.join(tokenized_line) + "\n" # has \n at the end
         destin_source.write(p)

@@ -17,14 +17,15 @@ Extract features and write these files in data_preprocessed/
 import yaml
 import argparse
 from utils.helpers import load_yaml, load_tokenizer, yield_lines_in_parallel, prepend_feature_to_string, plot_histogram
-from utils.paths import get_input_filepaths_dict, get_out_filepaths_dict, get_phase_suffix_pairs
+from utils.paths import get_input_filepaths_dict, get_out_filepaths_dict, get_phase_suffix_pairs, get_out_shardpath_dict, get_input_shardpath_dict
 from utils.feature_extraction import feature_bins_bundle_sentence, feature_bundle_sentence
 from utils.prepare_word_embeddings_frequency_ranks import load_ranks
 from utils.feature_bin_preparation import create_bins
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", required=True, help="yaml config file for preprocessing src and tgt")
-parser.add_argument("--tokenizer", required=True, help="the tokenizer to use for tokenizing the corpus, either 'spacy' or 'sentpiece'")
+parser.add_argument("--tokenizer", required=False, help="the tokenizer to use for tokenizing the corpus, either 'spacy' or 'sentpiece'")
+parser.add_argument("--shard", required=False, help="if used this should be the name of the shard file")
 args = vars(parser.parse_args())
 
 config = load_yaml(args["config"])
@@ -35,7 +36,7 @@ lang_allowed = {"en": "English", "de": "German"}
 features_allowed = {"dependency", "frequency", "length", "levenshtein"}
 splits_allowed = {"train", "valid", "test"}
 
-TOKENIZER_TYPE = args["tokenizer"]
+TOKENIZER_TYPE = args["tokenizer"] if args["tokenizer"] else 'sentpiece'
 TOKENIZER_MODEL = load_tokenizer(TOKENIZER_TYPE, LANG)
 
 # some checks
@@ -44,10 +45,16 @@ assert set(FEATURES_REQUESTED).issubset(features_allowed)
 print("... Preprocessing %s corpora and extracting features: %s " % (lang_allowed[config["lang"]],
                                                                      ", ".join(FEATURES_REQUESTED)))
 
-input_file_paths = get_input_filepaths_dict(LANG)
-output_file_paths = get_out_filepaths_dict(LANG, FEATURES_REQUESTED)
+shard_file = args["shard"]
+if shard_file:
+    input_file_paths = get_input_shardpath_dict(shard_file, LANG)
+    output_file_paths = get_out_shardpath_dict(shard_file, LANG, FEATURES_REQUESTED)
+    parallel_pairs_list = [[(shard_file, "src"), (shard_file, "tgt")]]
+else:
+    input_file_paths = get_input_filepaths_dict(LANG)
+    output_file_paths = get_out_filepaths_dict(LANG, FEATURES_REQUESTED)
+    parallel_pairs_list = get_phase_suffix_pairs()
 
-parallel_pairs_list = get_phase_suffix_pairs()
 feature_bins = create_bins()
 
 frequency_ranks = load_ranks(LANG)
@@ -96,3 +103,5 @@ for phase in parallel_pairs_list:
 if config["analyze_features"]:
     for f, _x in all_phases_all_feature_values.items():
         plot_histogram(_x, f, LANG)
+
+print("Finished Feature Extraction")
