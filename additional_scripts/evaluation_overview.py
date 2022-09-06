@@ -8,6 +8,7 @@ import os
 import argparse
 from os import listdir
 from utils.helpers import load_yaml
+from utils.paths import configs_dir, experiments_dir
 
 
 def create_eval_overview(out_file: str, experiments: list):
@@ -36,7 +37,7 @@ def create_eval_overview(out_file: str, experiments: list):
         result_file.write("\n")
 
         # one line per experiment
-        for config_file in os.listdir('configs/parameter_tuning'):
+        for config_file in os.listdir(f'{configs_dir}/parameter_tuning'):
             # get the config file names and check which ones to include
             name, ending = config_file.split('.')
             exp_id = ''
@@ -53,11 +54,11 @@ def create_eval_overview(out_file: str, experiments: list):
                 continue
 
             # parameters values are specified in the config file
-            config_path = f'configs/parameter_tuning/{name}.{ending}'
+            config_path = f'{configs_dir}/parameter_tuning/{name}.{ending}'
             config_file = load_yaml(config_path)
 
             # evaluation scores are in the output files from the training
-            eval_path = f'experiments/{exp}/checkpoints/evaluation.txt'
+            eval_path = f'{experiments_dir}/{exp}/checkpoints/evaluation.txt'
 
             # make sure that a trained model exists for the current configuration file:
             if exp not in os.listdir('experiments'):
