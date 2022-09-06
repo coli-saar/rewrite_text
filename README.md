@@ -12,8 +12,11 @@ A prerequisite of training is extensive preprocessing with feature extraction.
 ## Requirements
 Install a conda environment for python 3.6.
 
-Install the requirements from `requirements.txt` with pip using `pip install -r requirements.txt`.
-If there is an issue with spacy language models, comment those lines out, try installing with pip again.
+Run `pip install -e .` in the main repository directory. This will install all requirements from requirements.txt and enable to successfully import functions from the utils, generation and with_fairseq subdirectories. 
+
+Alternatively, you can install the requirements from `requirements.txt` with pip using `pip install -r requirements.txt`.
+If there is an issue with spacy language models, comment those lines out, try installing with pip again. <br>
+Please note, that installing only the requirements (instead of running `pip install -e .`) will lead to issues at least for the scripts in the additional_scripts folder. 
 
 Afterwards, download the language models separately using
 - `python -m spacy download en_core_web_sm` for English

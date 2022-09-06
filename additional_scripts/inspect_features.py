@@ -6,6 +6,9 @@ import argparse
 import numpy as np
 
 
+FEATURES = ["dependency", "frequency", "length", "levenshtein"]
+
+
 def extract_features(file_path: str):
     """
     :param file_path: path to the preprocessed source file, i.e. the file that includes the features that were extracted
@@ -124,7 +127,5 @@ if __name__=="__main__":
     parser.add_argument("--out", required=True, help="path for the folder where the plots get saved")
     args = vars(parser.parse_args())
 
-    features = ["dependency", "frequency", "length", "levenshtein"]
-
-    plot_features_corpus(args["lang"], features, args["out"])
+    plot_features_corpus(args["lang"], FEATURES, args["out"])
 
