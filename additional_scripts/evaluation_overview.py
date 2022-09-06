@@ -36,7 +36,7 @@ def create_eval_overview(out_file: str, experiments: list):
         result_file.write("\n")
 
         # one line per experiment
-        for config_file in os.listdir('configs/parameter_tuning2'):
+        for config_file in os.listdir('configs/parameter_tuning'):
             # get the config file names and check which ones to include
             name, ending = config_file.split('.')
             exp_id = ''
@@ -53,7 +53,7 @@ def create_eval_overview(out_file: str, experiments: list):
                 continue
 
             # parameters values are specified in the config file
-            config_path = f'configs/parameter_tuning2/{name}.{ending}'
+            config_path = f'configs/parameter_tuning/{name}.{ending}'
             config_file = load_yaml(config_path)
 
             # evaluation scores are in the output files from the training
