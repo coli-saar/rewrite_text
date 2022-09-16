@@ -9,6 +9,7 @@ cymem==2.0.6
 dataclasses==0.8
 de-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.2.0/de_core_news_sm-3.2.0-py3-none-any.whl
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0-py3-none-any.whl
+fairseq==0.12.2
 gitdb==4.0.9
 GitPython==3.1.18
 idna==3.3
