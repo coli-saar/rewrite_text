@@ -4,6 +4,7 @@ from utils.helpers import feature2spec_token
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
+from pathlib import Path
 
 
 FEATURES = ["dependency", "frequency", "length", "levenshtein"]
@@ -100,7 +101,9 @@ def plot_features_corpus(lang, features, plot_dir):
     val_features = extract_features(preprocessed_data_dir / feature_folder / "valid.src")
     test_features = extract_features(preprocessed_data_dir / feature_folder / "test.src")
 
-    # make the historgrams for the individual splits
+    Path(plot_dir).mkdir(exist_ok=True, parents=True)
+
+    # make the histograms for the individual splits
     plot_features_split(features, train_features, lang, plot_dir, "train_split")
     plot_features_split(features, val_features, lang, plot_dir, "val_split")
     plot_features_split(features, test_features, lang, plot_dir, "test_split")
