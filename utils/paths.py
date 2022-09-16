@@ -12,6 +12,7 @@ data_auxiliary_dir = Path(REPO_DIR) / "data_auxiliary"
 data_shard_dir = Path(REPO_DIR) / "data_shards"
 configs_dir = Path(REPO_DIR) / "configs"
 experiments_dir = Path(REPO_DIR) / "experiments"
+additional_script_dir = Path(REPO_DIR) / "additional_scripts"
 
 evaluation_dir = Path(REPO_DIR) / "evaluation"
 
